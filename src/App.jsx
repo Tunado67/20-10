@@ -331,17 +331,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(0);
   const [showHonorCard, setShowHonorCard] = useState(false);
   const [giftRevealed, setGiftRevealed] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const scrollRef = useRef(null);
-
-  const checkScroll = useCallback(() => {
-    if (!scrollRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    // If content doesn't overflow or user scrolled close to bottom (within 25px)
-    const atBottom = (scrollHeight - clientHeight <= 25) || (scrollTop + clientHeight >= scrollHeight - 30);
-    setIsAtBottom(atBottom);
-  }, []);
 
   useEffect(() => {
     async function fetchStudent() {
@@ -377,11 +368,7 @@ export default function App() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-    const timer = setTimeout(() => {
-      checkScroll();
-    }, 60);
-    return () => clearTimeout(timer);
-  }, [activeTab, giftRevealed, checkScroll, loading, showHonorCard]);
+  }, [activeTab, showHonorCard]);
 
   const handleOpenHonorCard = useCallback(() => {
     confetti({
@@ -429,7 +416,6 @@ export default function App() {
             {/* Scrollable Content Container */}
             <div
               ref={scrollRef}
-              onScroll={checkScroll}
               className="flex-1 overflow-y-auto px-4 py-2 relative z-10 flex flex-col"
             >
               <AnimatePresence mode="wait">
@@ -648,9 +634,7 @@ export default function App() {
 
             {/* Bottom Navigation Bar - Sticky bottom with gradient blur backdrop */}
             <div
-              className={`sticky bottom-0 left-0 right-0 z-40 p-3 bg-gradient-to-t from-rose-950 via-rose-950/90 to-transparent backdrop-blur-sm transition-all duration-300 ${
-                isAtBottom ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
-              }`}
+              className="sticky bottom-0 left-0 right-0 z-40 p-3 bg-gradient-to-t from-rose-950 via-rose-950/90 to-transparent backdrop-blur-sm"
             >
               <div className="flex items-center justify-between px-3 py-2 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
                 {/* Left Arrow Button */}
