@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "./supabaseClient";
 import { motion, AnimatePresence } from "framer-motion";
 import html2canvas from "html2canvas";
@@ -35,16 +35,18 @@ const FALLBACK = {
 const BACKGROUND_EMOJIS = ["✨", "🌸", "💖", "🎀", "🌺", "🌷", "✨", "🌹"];
 
 function AmbientParticles() {
-  const particles = useRef(
-    Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      emoji: BACKGROUND_EMOJIS[i % BACKGROUND_EMOJIS.length],
-      left: `${(i * 8 + 3) % 92}%`,
-      delay: `${(i * 0.4) % 4}s`,
-      duration: `${6 + (i * 0.8) % 4}s`,
-      size: `${0.8 + (i * 0.1) % 0.6}rem`,
-    }))
-  ).current;
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => ({
+        id: i,
+        emoji: BACKGROUND_EMOJIS[i % BACKGROUND_EMOJIS.length],
+        left: `${(i * 8 + 3) % 92}%`,
+        delay: `${(i * 0.4) % 4}s`,
+        duration: `${6 + (i * 0.8) % 4}s`,
+        size: `${0.8 + (i * 0.1) % 0.6}rem`,
+      })),
+    []
+  );
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -220,24 +222,15 @@ function Stage1EnchantedRose({ onRoseTap }) {
 function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
   const messages = skyMessages && skyMessages.length > 0 ? skyMessages : FALLBACK.sky_messages;
   const [currentPage, setCurrentPage] = useState(0);
-  const [isFlipping, setIsFlipping] = useState(false);
   const [messagesFinished, setMessagesFinished] = useState(false);
   const [flowerStage, setFlowerStage] = useState(0);
 
   const handleCardFlip = () => {
-    if (isFlipping || messagesFinished) return;
-    setIsFlipping(true);
-
+    if (messagesFinished) return;
     if (currentPage < messages.length - 1) {
-      setTimeout(() => {
-        setCurrentPage(prev => prev + 1);
-        setIsFlipping(false);
-      }, 300);
+      setCurrentPage(prev => prev + 1);
     } else {
-      setTimeout(() => {
-        setMessagesFinished(true);
-        setIsFlipping(false);
-      }, 300);
+      setMessagesFinished(true);
     }
   };
 
@@ -275,45 +268,45 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
       <div className="z-10 my-auto flex flex-col items-center justify-center w-full max-w-xs mx-auto">
         {!messagesFinished ? (
           <div className="flex flex-col items-center w-full gap-4">
-            {/* Interactive Mini Flip Card - Plain text without header/quotes */}
-            <motion.div
-              onClick={handleCardFlip}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.96 }}
-              animate={{ rotateY: isFlipping ? 90 : 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="w-full min-h-[190px] bg-gradient-to-br from-rose-900/90 via-purple-900/90 to-slate-900/90 backdrop-blur-xl border-2 border-pink-400/40 rounded-2xl p-6 shadow-2xl cursor-pointer flex flex-col justify-between relative overflow-hidden select-none text-center"
-            >
-              {/* Decorative Corner Stars */}
-              <div className="absolute top-2 left-3 text-amber-300 text-xs">✨</div>
-              <div className="absolute top-2 right-3 text-pink-300 text-xs">🌸</div>
-              <div className="absolute bottom-2 right-3 text-amber-200 text-xs">✨</div>
-
+            {/* Interactive Mini Flip Card - Plain text with realistic 3D page flip */}
+            <div className="w-full [perspective:1000px] flex justify-center">
               <AnimatePresence mode="wait">
-                <motion.p
+                <motion.div
                   key={currentPage}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-sm sm:text-base font-medium text-pink-100 leading-relaxed my-auto text-glow pt-4 pb-2"
+                  onClick={handleCardFlip}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.96 }}
+                  initial={{ rotateY: -90, scale: 0.9, opacity: 0 }}
+                  animate={{ rotateY: 0, scale: 1, opacity: 1 }}
+                  exit={{ rotateY: 90, scale: 0.9, opacity: 0 }}
+                  transition={{ duration: 0.45, ease: [0.25, 0.8, 0.25, 1] }}
+                  style={{ transformStyle: "preserve-3d" }}
+                  className="w-full min-h-[200px] bg-gradient-to-br from-rose-900/90 via-purple-900/90 to-slate-900/90 backdrop-blur-xl border-2 border-pink-400/40 rounded-2xl p-6 shadow-2xl cursor-pointer flex flex-col justify-between relative overflow-hidden select-none text-center"
                 >
-                  {messages[currentPage]}
-                </motion.p>
+                  {/* Decorative Corner Stars */}
+                  <div className="absolute top-2.5 left-3 text-amber-300 text-xs">✨</div>
+                  <div className="absolute top-2.5 right-3 text-pink-300 text-xs">🌸</div>
+                  <div className="absolute bottom-2.5 right-3 text-amber-200 text-xs">✨</div>
+                  <div className="absolute bottom-2.5 left-3 text-pink-300 text-xs">💖</div>
+
+                  <p className="text-sm sm:text-base font-medium text-pink-100 leading-relaxed my-auto text-glow py-4">
+                    {messages[currentPage]}
+                  </p>
+
+                  <div className="text-[11px] text-pink-300/80 font-semibold flex items-center justify-center gap-1.5 pt-2 border-t border-pink-400/20">
+                    <span>Chạm để lật sang trang tiếp</span>
+                    <motion.span
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.2 }}
+                    >
+                      📖 →
+                    </motion.span>
+                  </div>
+                </motion.div>
               </AnimatePresence>
+            </div>
 
-              <div className="text-[11px] text-pink-300/80 font-semibold flex items-center justify-center gap-1.5 pt-2 border-t border-pink-400/20">
-                <span>Chạm để lật sang trang tiếp</span>
-                <motion.span
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.2 }}
-                >
-                  📖 →
-                </motion.span>
-              </div>
-            </motion.div>
-
-            {/* Page Dots */}
+            {/* Pagination Dots */}
             <div className="flex items-center gap-2">
               {messages.map((_, idx) => (
                 <div
@@ -459,24 +452,31 @@ function Stage3GreetingCard({ student, onNextStage }) {
     setIsOpen(true);
   };
 
-  // Typewriter effect when card is opened
+  // Typewriter effect when card is opened (Slower speed: 85ms per character)
   useEffect(() => {
     if (!isOpen) return;
+    let interval;
     let index = 0;
-    setDisplayedText("");
-    setTypingComplete(false);
 
-    const interval = setInterval(() => {
-      if (index < wishText.length) {
-        setDisplayedText(wishText.slice(0, index + 1));
-        index++;
-      } else {
-        setTypingComplete(true);
-        clearInterval(interval);
-      }
-    }, 35);
+    // Wait for unfolding animation to start before typing
+    const startDelay = setTimeout(() => {
+      setDisplayedText("");
+      setTypingComplete(false);
+      interval = setInterval(() => {
+        if (index < wishText.length) {
+          setDisplayedText(wishText.slice(0, index + 1));
+          index++;
+        } else {
+          setTypingComplete(true);
+          clearInterval(interval);
+        }
+      }, 85);
+    }, 600);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(startDelay);
+      if (interval) clearInterval(interval);
+    };
   }, [isOpen, wishText]);
 
   return (
@@ -497,17 +497,24 @@ function Stage3GreetingCard({ student, onNextStage }) {
         </span>
       </div>
 
-      {/* Main Card / Envelope Container */}
-      <div className="z-10 my-auto w-full max-w-xs flex flex-col items-center">
+      {/* Main Envelope & Card Opening Animation Container */}
+      <div className="z-10 my-auto w-full max-w-xs flex flex-col items-center [perspective:1000px]">
         {!isOpen ? (
           /* Sealed Envelope with Wax Seal "Mở" */
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6 }}
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, transition: { duration: 0.4 } }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             onClick={handleOpenCard}
             className="w-full h-72 rounded-3xl bg-gradient-to-br from-rose-900 via-purple-900 to-slate-900 border-2 border-pink-400/40 p-6 shadow-2xl flex flex-col items-center justify-between relative cursor-pointer group overflow-hidden select-none"
           >
+            {/* Top Triangular Flap visual */}
+            <div
+              className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-pink-500/20 to-transparent pointer-events-none"
+              style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
+            />
+
             {/* Corner Decorative Accents */}
             <div className="absolute top-3 left-4 text-pink-300 text-sm">🌸</div>
             <div className="absolute top-3 right-4 text-amber-300 text-sm">✨</div>
@@ -515,7 +522,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
             <div className="absolute bottom-3 right-4 text-pink-300 text-sm">💖</div>
 
             {/* Recipient Title */}
-            <div className="text-center pt-3">
+            <div className="text-center pt-3 z-10">
               <p className="text-xs font-bold text-pink-300 uppercase tracking-widest">
                 GỬI TỚI
               </p>
@@ -528,7 +535,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="relative my-auto cursor-pointer"
+              className="relative my-auto cursor-pointer z-10"
             >
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose-600 to-red-800 border-4 border-amber-300/80 shadow-2xl flex items-center justify-center wax-seal-glow">
                 <span className="text-amber-100 font-black text-lg tracking-wider drop-shadow-md">
@@ -537,22 +544,30 @@ function Stage3GreetingCard({ student, onNextStage }) {
               </div>
             </motion.div>
 
-            <p className="text-[11px] text-pink-200/80 font-medium tracking-wide pb-1">
+            <p className="text-[11px] text-pink-200/80 font-medium tracking-wide pb-1 z-10">
               Chạm vào dấu sáp để mở thiệp ✨
             </p>
           </motion.div>
         ) : (
-          /* Unfolded Greeting Card with Typewriter Text */
+          /* Smooth Unfolding / Opening Greeting Card Animation */
           <motion.div
-            initial={{ rotateX: -90, opacity: 0 }}
-            animate={{ rotateX: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full min-h-[300px] rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 shadow-2xl flex flex-col justify-between relative select-none"
-            style={{
-              backgroundImage: "radial-gradient(#cbd5e1 0.75px, transparent 0.75px)",
-              backgroundSize: "16px 16px",
+            initial={{ rotateX: -70, y: 50, scale: 0.85, opacity: 0 }}
+            animate={{ rotateX: 0, y: 0, scale: 1, opacity: 1 }}
+            transition={{
+              duration: 1.0,
+              ease: [0.16, 1, 0.3, 1], // Gentle spring curve
             }}
+            style={{ transformOrigin: "top center", transformStyle: "preserve-3d" }}
+            className="w-full min-h-[310px] rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 shadow-2xl flex flex-col justify-between relative select-none"
           >
+            {/* Unfolding top edge ribbon shine */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.3, duration: 0.7 }}
+              className="absolute -top-1 left-8 right-8 h-1 bg-gradient-to-r from-transparent via-pink-400 to-transparent rounded-full"
+            />
+
             {/* Card Top Stamp Header */}
             <div className="flex justify-between items-center border-b border-pink-200 pb-3 mb-3">
               <span className="text-xs font-bold text-rose-600 tracking-wider">
@@ -565,9 +580,9 @@ function Stage3GreetingCard({ student, onNextStage }) {
 
             {/* Personalized Typewriter Text */}
             <div className="my-auto py-2">
-              <p className="text-sm sm:text-base font-semibold leading-relaxed text-slate-800 italic font-serif">
+              <p className="text-sm sm:text-base font-semibold leading-relaxed text-slate-800 italic font-serif min-h-[80px]">
                 {displayedText}
-                {!typingComplete && <span className="typing-cursor" />}
+                {!typingComplete && <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>}
               </p>
             </div>
 
@@ -732,28 +747,34 @@ function Stage4HonorVisaCard({ student, onRestart }) {
           backgroundSize: "100% 24px",
         }}
       >
-        {/* Large Handmade Stickers Surrounding Card */}
+        {/* Large Handmade Scrapbook Stickers Placed Along Outer Margins & Empty Negative Spaces (No Overlapping) */}
         <motion.div
           variants={itemVariants}
-          className="absolute top-8 left-2 text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border border-slate-200 select-none z-20 rotate-[-12deg]"
+          className="absolute top-2 left-2 text-2xl sm:text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border-2 border-slate-200 select-none z-20 rotate-[-12deg]"
         >
           {stickers[0] || "🌸"}
         </motion.div>
         <motion.div
           variants={itemVariants}
-          className="absolute top-8 right-2 text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border border-slate-200 select-none z-20 rotate-[15deg]"
+          className="absolute top-2 right-2 text-2xl sm:text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border-2 border-slate-200 select-none z-20 rotate-[15deg]"
         >
           {stickers[1] || "✨"}
         </motion.div>
         <motion.div
           variants={itemVariants}
-          className="absolute bottom-16 left-2 text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border border-slate-200 select-none z-20 rotate-[8deg]"
+          className="absolute top-28 left-2 text-2xl sm:text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border-2 border-slate-200 select-none z-20 rotate-[-8deg]"
         >
           {stickers[2] || "👑"}
         </motion.div>
         <motion.div
           variants={itemVariants}
-          className="absolute bottom-16 right-2 text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border border-slate-200 select-none z-20 rotate-[-18deg]"
+          className="absolute top-28 right-2 text-2xl sm:text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border-2 border-slate-200 select-none z-20 rotate-[12deg]"
+        >
+          {stickers[4] || "🎓"}
+        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="absolute bottom-16 left-3 text-2xl sm:text-3xl filter drop-shadow-md bg-white p-1.5 rounded-full border-2 border-slate-200 select-none z-20 rotate-[-15deg]"
         >
           {stickers[3] || "💖"}
         </motion.div>
@@ -761,7 +782,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
         {/* Boarding Pass Top Header Accent */}
         <motion.div
           variants={itemVariants}
-          className="flex justify-between items-center text-[10px] tracking-widest uppercase font-extrabold text-slate-700 z-10 border-b-2 border-slate-300 pb-2.5 bg-white/90 backdrop-blur-xs rounded-t-xl"
+          className="flex justify-between items-center text-[10px] tracking-widest uppercase font-extrabold text-slate-700 z-10 border-b-2 border-slate-300 pb-2.5 px-7 bg-white/90 backdrop-blur-xs rounded-t-xl"
         >
           <div className="flex items-center gap-1.5 text-rose-600 font-bold">
             <span className="text-sm">✈️</span>
@@ -773,7 +794,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
         </motion.div>
 
         {/* Passport Main Section (Avatar, Name, Traits, Wishes) */}
-        <div className="flex flex-col items-center justify-center gap-2 my-auto z-10">
+        <div className="flex flex-col items-center justify-center gap-2 my-auto z-10 px-4">
           {/* Main Student Avatar Photo */}
           <motion.div variants={itemVariants} className="relative">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-rose-500 p-1 bg-white shadow-lg mx-auto overflow-hidden shrink-0">
@@ -787,10 +808,6 @@ function Stage4HonorVisaCard({ student, onRestart }) {
                 }}
               />
             </div>
-            {/* Sticker on avatar frame */}
-            <span className="absolute -top-3 -right-3 text-xl bg-white p-1 rounded-full border border-slate-200 shadow-md select-none rotate-12">
-              {stickers[4] || "🎓"}
-            </span>
           </motion.div>
 
           {/* Student Name */}
