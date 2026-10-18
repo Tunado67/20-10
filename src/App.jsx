@@ -410,7 +410,7 @@ export default function App() {
   const isLastTab = activeTab === TABS.length - 1;
 
   return (
-    <div className="w-full max-w-sm sm:max-w-md h-dvh mx-auto relative overflow-hidden bg-gradient-to-b from-rose-950 via-pink-900 to-purple-950 text-white font-sans flex flex-col justify-between p-4 sm:p-5">
+    <div className="w-full max-w-sm sm:max-w-md h-dvh mx-auto relative overflow-hidden overflow-x-hidden bg-gradient-to-b from-rose-950 via-pink-900 to-purple-950 text-white font-sans flex flex-col justify-between">
       <AnimatePresence mode="wait">
         {loading ? (
           <LoadingScreen key="loading" />
@@ -423,14 +423,14 @@ export default function App() {
             />
           </div>
         ) : (
-          <div key="main-app" className="absolute inset-0 z-10 flex flex-col p-4 sm:p-5">
+          <div key="main-app" className="absolute inset-0 z-10 flex flex-col">
             <FloatingStickers />
 
             {/* Scrollable Content Container */}
             <div
               ref={scrollRef}
               onScroll={checkScroll}
-              className="flex-1 overflow-y-auto relative z-10 flex flex-col pb-20"
+              className="flex-1 overflow-y-auto px-4 py-2 relative z-10 flex flex-col"
             >
               <AnimatePresence mode="wait">
                 {activeTab === 0 && (
@@ -535,11 +535,11 @@ export default function App() {
                       </span>
                     </div>
 
-                    <div className="flex flex-col gap-3.5 items-center w-full max-h-[65vh] overflow-y-auto pr-1">
+                    <div className="flex flex-col gap-3 items-center w-full">
                       {memoriesList.map((mem) => (
                         <div
                           key={mem.id}
-                          className="w-full max-w-[260px] sm:max-w-[280px] mx-auto bg-white text-gray-800 p-2 pb-2.5 rounded-md shadow-xl relative transition-transform"
+                          className="w-full max-w-[220px] sm:max-w-[260px] mx-auto bg-white text-gray-800 p-2 pb-2.5 rounded-md shadow-xl relative transition-transform"
                           style={{ transform: `rotate(${mem.rotate || '0deg'})` }}
                         >
                           {/* Washi Tape */}
@@ -550,12 +550,12 @@ export default function App() {
                             {mem.sticker || '✨'}
                           </div>
 
-                          {/* Photo Box with controlled height */}
-                          <div className="w-full bg-gray-100 rounded-xs overflow-hidden shadow-inner">
+                          {/* Photo Box */}
+                          <div className="w-full bg-gray-100 rounded-xl overflow-hidden shadow-inner">
                             <img
                               src={mem.url}
                               alt={mem.caption}
-                              className="w-full max-h-[180px] object-cover"
+                              className="w-full h-[140px] sm:h-[160px] object-cover rounded-xl"
                               onError={e => {
                                 e.currentTarget.src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80';
                               }}
@@ -646,9 +646,9 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            {/* Bottom Navigation Bar - Fixed at bottom, visible when reaching bottom of screen */}
+            {/* Bottom Navigation Bar - Sticky bottom with gradient blur backdrop */}
             <div
-              className={`absolute bottom-4 left-4 right-4 z-30 transition-all duration-300 ${
+              className={`sticky bottom-0 left-0 right-0 z-40 p-3 bg-gradient-to-t from-rose-950 via-rose-950/90 to-transparent backdrop-blur-sm transition-all duration-300 ${
                 isAtBottom ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
               }`}
             >
