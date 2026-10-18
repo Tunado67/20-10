@@ -6,7 +6,6 @@
   --font-body: 'Be Vietnam Pro', sans-serif;
 }
 
-/* ── Reset & base ── */
 *, *::before, *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -18,7 +17,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #0f051d;
+  background-color: #020617;
 }
 
 body {
@@ -27,18 +26,94 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollable inner area ── */
-.scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+/* Hide scrollbar for clean UI */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.scroll-area::-webkit-scrollbar { display: none; }
+/* ── Glass Dome FX ── */
+.glass-dome {
+  background: radial-gradient(120% 120% at 30% 10%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.15) 100%);
+  box-shadow: 0 0 35px rgba(244, 114, 182, 0.35), inset 0 0 25px rgba(255, 255, 255, 0.3), inset 0 2px 10px rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+}
 
-/* ── Floating petals background ── */
+/* ── Rose Glow Pulse ── */
+@keyframes roseGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.8)) drop-shadow(0 0 30px rgba(236, 72, 153, 0.5));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(244, 63, 94, 1)) drop-shadow(0 0 50px rgba(236, 72, 153, 0.85));
+    transform: scale(1.03);
+  }
+}
+
+.rose-glow {
+  animation: roseGlow 3s ease-in-out infinite;
+}
+
+/* ── Glowing text pulse ── */
+@keyframes textGlowPulse {
+  0%, 100% {
+    opacity: 0.85;
+    text-shadow: 0 0 10px rgba(244, 114, 182, 0.7);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 22px rgba(244, 114, 182, 1), 0 0 35px rgba(251, 191, 36, 0.8);
+  }
+}
+
+.text-glow {
+  animation: textGlowPulse 2s ease-in-out infinite;
+}
+
+/* ── Floating Glimmer Particles ── */
+@keyframes floatGlimmer {
+  0% { transform: translateY(0px) rotate(0deg) scale(0.6); opacity: 0.2; }
+  50% { transform: translateY(-18px) rotate(180deg) scale(1.2); opacity: 0.95; }
+  100% { transform: translateY(-36px) rotate(360deg) scale(0.6); opacity: 0; }
+}
+
+.glimmer-particle {
+  position: absolute;
+  pointer-events: none;
+  animation: floatGlimmer linear infinite;
+}
+
+/* ── Typewriter Blink Cursor ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor::after {
+  content: '|';
+  margin-left: 2px;
+  color: #f472b6;
+  font-weight: bold;
+  animation: blink 0.8s infinite;
+}
+
+/* ── Wax Seal Glow ── */
+@keyframes waxSealPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.6), 0 4px 15px rgba(225, 29, 72, 0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(225, 29, 72, 0), 0 6px 25px rgba(244, 63, 94, 0.7); }
+}
+
+.wax-seal-glow {
+  animation: waxSealPulse 2s ease-in-out infinite;
+}
+
+/* ── Floating Petals / Background Stars ── */
 @keyframes floatUp {
   0%   { transform: translateY(100vh) rotate(0deg) scale(0.6); opacity: 0; }
   10%  { opacity: 0.8; }
@@ -50,110 +125,12 @@ body {
   position: absolute;
   pointer-events: none;
   animation: floatUp linear infinite;
-  font-size: 1.2rem;
-}
-
-/* ── Shimmer text effect ── */
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
-}
-
-.text-shimmer {
-  background: linear-gradient(90deg, #fbbf24, #fef9c3, #f59e0b, #fef3c7, #fbbf24);
-  background-size: 200% auto;
-  animation: shimmer 3s linear infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ── Glow pulse on avatar ── */
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.5); }
-  50%       { box-shadow: 0 0 0 12px rgba(236, 72, 153, 0); }
-}
-
-.avatar-glow {
-  animation: glowPulse 2.5s ease-in-out infinite;
-}
-
-/* ── Heartbeat for icon ── */
-@keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  15%       { transform: scale(1.25); }
-  30%       { transform: scale(1); }
-  45%       { transform: scale(1.15); }
-}
-
-.heartbeat {
-  animation: heartbeat 1.6s ease-in-out infinite;
-}
-
-/* ── Bounce arrow ── */
-@keyframes bounceY {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(8px); }
-}
-
-.bounce-y {
-  animation: bounceY 1.2s ease-in-out infinite;
-}
-
-/* ── Story card (html2canvas target) ──
-   No border-radius, no transforms, no backdrop-filter — all break canvas */
-.story-canvas-target {
-  border-radius: 0 !important;
-  transform: none !important;
-  -webkit-transform: none !important;
-  font-family: var(--font-body) !important;
-}
-
-/* ── Safe area ── */
-.pb-safe {
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
-}
-
-/* ── Tab active underline ── */
-.tab-btn {
-  position: relative;
-  transition: color 0.2s;
-}
-
-.tab-btn::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 3px;
-  border-radius: 9999px;
-  background: #ec4899;
-  transition: width 0.3s ease;
-}
-
-.tab-btn.active::after {
-  width: 70%;
 }
 
 /* ── Card glass ── */
-.glass {
+.glass-card {
   background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-/* ── Gradient border ── */
-.gradient-border {
-  position: relative;
-  background: linear-gradient(135deg, #831843, #9d174d, #831843);
-  padding: 2px;
-  border-radius: 9999px;
-}
-
-.gradient-border-inner {
-  border-radius: 9999px;
-  overflow: hidden;
 }
