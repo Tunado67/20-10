@@ -301,7 +301,7 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
       } else {
         setMessagesFinished(true);
       }
-    }, 3200);
+    }, 4500);
 
     return () => clearTimeout(timer);
   }, [currentMsgIndex, messagesFinished]);
