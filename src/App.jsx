@@ -494,7 +494,6 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [cardSettled, setCardSettled] = useState(false);
   const rawWishText = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
   const wishText = useMemo(() => (typeof rawWishText === "string" ? rawWishText.normalize("NFC") : rawWishText), [rawWishText]);
   const [displayedText, setDisplayedText] = useState("");
@@ -506,29 +505,32 @@ function Stage3GreetingCard({ student, onNextStage }) {
     setIsOpen(true);
   };
 
-  // Graceful typewriter effect starting ONLY AFTER card has fully slid into place and settled
+  // Graceful typewriter effect starting smoothly after card opens
   useEffect(() => {
-    if (!isOpen || !cardSettled) return;
+    if (!isOpen) return;
     let interval;
     let index = 0;
 
     setDisplayedText("");
     setTypingComplete(false);
 
-    interval = setInterval(() => {
-      if (index < wishText.length) {
-        setDisplayedText(wishText.slice(0, index + 1));
-        index++;
-      } else {
-        setTypingComplete(true);
-        clearInterval(interval);
-      }
-    }, 85);
+    const startTimeout = setTimeout(() => {
+      interval = setInterval(() => {
+        if (index < wishText.length) {
+          setDisplayedText(wishText.slice(0, index + 1));
+          index++;
+        } else {
+          setTypingComplete(true);
+          clearInterval(interval);
+        }
+      }, 70);
+    }, 300);
 
     return () => {
+      clearTimeout(startTimeout);
       if (interval) clearInterval(interval);
     };
-  }, [isOpen, cardSettled, wishText]);
+  }, [isOpen, wishText]);
 
   return (
     <motion.div
@@ -600,18 +602,15 @@ function Stage3GreetingCard({ student, onNextStage }) {
             </p>
           </motion.div>
         ) : (
-          /* Smooth Slide-Down Entrance Greeting Card Opening Animation */
+          /* Smooth Scale-Up & Slide-Up Entrance Greeting Card Animation */
           <motion.div
-            initial={{ y: -160, opacity: 0, scale: 0.9, rotateX: -15 }}
-            animate={{ y: 0, opacity: 1, scale: 1, rotateX: 0 }}
+            initial={{ y: 40, opacity: 0, scale: 0.88 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
             transition={{
-              type: "spring",
-              damping: 18,
-              stiffness: 110,
-              mass: 0.9,
+              duration: 0.7,
+              ease: [0.16, 1, 0.3, 1],
             }}
-            onAnimationComplete={() => setCardSettled(true)}
-            style={{ transformOrigin: "top center", transformStyle: "preserve-3d" }}
+            style={{ transformOrigin: "bottom center" }}
             className="w-full min-h-[310px] rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 shadow-2xl flex flex-col justify-between relative select-none"
           >
             {/* Unfolding top edge ribbon shine */}
@@ -653,26 +652,30 @@ function Stage3GreetingCard({ student, onNextStage }) {
         )}
       </div>
 
-      {/* Bottom Button to Stage 4 (Honor Visa Card) */}
+      {/* Bottom Button to Stage 4 (Honor Visa Card) - Appears ONLY after typewriter finishes */}
       <div className="z-10 pb-4 h-16 flex items-end w-full max-w-xs shrink-0">
-        {isOpen && (
-          <motion.button
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onNextStage}
-            className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
-          >
-            <span>Mở Thẻ Vinh Danh ✈️</span>
-            <motion.span
-              animate={{ x: [0, 5, 0] }}
-              transition={{ repeat: Infinity, duration: 1.2 }}
+        <AnimatePresence>
+          {isOpen && typingComplete && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onNextStage}
+              className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
             >
-              →
-            </motion.span>
-          </motion.button>
-        )}
+              <span>Mở Thẻ Vinh Danh ✈️</span>
+              <motion.span
+                animate={{ x: [0, 5, 0] }}
+                transition={{ repeat: Infinity, duration: 1.2 }}
+              >
+                →
+              </motion.span>
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
