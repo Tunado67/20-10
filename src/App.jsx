@@ -227,6 +227,7 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
   const [currentPage, setCurrentPage] = useState(0);
   const [messagesFinished, setMessagesFinished] = useState(false);
   const [flowerStage, setFlowerStage] = useState(0);
+  const [fireworksSettled, setFireworksSettled] = useState(false);
 
   const handleCardFlip = () => {
     if (messagesFinished) return;
@@ -248,6 +249,54 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
 
     return () => timers.forEach(t => clearTimeout(t));
   }, [messagesFinished]);
+
+  // Fireworks celebration trigger after flower bouquet finishes blooming
+  useEffect(() => {
+    if (flowerStage !== 4) return;
+
+    // Multi-colored celebratory fireworks bursts using canvas-confetti
+    const duration = 2000;
+    const animationEnd = Date.now() + duration;
+    const colors = ["#f43f5e", "#ec4899", "#fbbf24", "#a855f7", "#3b82f6", "#10b981", "#ffffff"];
+
+    const interval = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        setFireworksSettled(true);
+        return;
+      }
+
+      const particleCount = 40 * (timeLeft / duration);
+
+      // Left burst
+      confetti({
+        particleCount,
+        angle: 60,
+        spread: 70,
+        origin: { x: 0.1, y: 0.6 },
+        colors,
+      });
+      // Right burst
+      confetti({
+        particleCount,
+        angle: 120,
+        spread: 70,
+        origin: { x: 0.9, y: 0.6 },
+        colors,
+      });
+      // Center burst
+      confetti({
+        particleCount: particleCount * 0.8,
+        angle: 90,
+        spread: 100,
+        origin: { x: 0.5, y: 0.5 },
+        colors,
+      });
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, [flowerStage]);
 
   return (
     <motion.div
@@ -417,7 +466,7 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
 
       {/* Bottom Action Button: "Xem Thiệp Lời Chúc ✉️ →" */}
       <div className="z-10 pb-4 h-16 flex items-end w-full max-w-xs mx-auto">
-        {messagesFinished && flowerStage >= 4 && (
+        {messagesFinished && flowerStage >= 4 && fireworksSettled && (
           <motion.button
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -445,6 +494,7 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [cardSettled, setCardSettled] = useState(false);
   const rawWishText = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
   const wishText = useMemo(() => (typeof rawWishText === "string" ? rawWishText.normalize("NFC") : rawWishText), [rawWishText]);
   const [displayedText, setDisplayedText] = useState("");
@@ -456,32 +506,29 @@ function Stage3GreetingCard({ student, onNextStage }) {
     setIsOpen(true);
   };
 
-  // Typewriter effect when card is opened (Slower speed: 85ms per character)
+  // Graceful typewriter effect starting ONLY AFTER card has fully slid into place and settled
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !cardSettled) return;
     let interval;
     let index = 0;
 
-    // Wait for unfolding animation to start before typing
-    const startDelay = setTimeout(() => {
-      setDisplayedText("");
-      setTypingComplete(false);
-      interval = setInterval(() => {
-        if (index < wishText.length) {
-          setDisplayedText(wishText.slice(0, index + 1));
-          index++;
-        } else {
-          setTypingComplete(true);
-          clearInterval(interval);
-        }
-      }, 85);
-    }, 600);
+    setDisplayedText("");
+    setTypingComplete(false);
+
+    interval = setInterval(() => {
+      if (index < wishText.length) {
+        setDisplayedText(wishText.slice(0, index + 1));
+        index++;
+      } else {
+        setTypingComplete(true);
+        clearInterval(interval);
+      }
+    }, 85);
 
     return () => {
-      clearTimeout(startDelay);
       if (interval) clearInterval(interval);
     };
-  }, [isOpen, wishText]);
+  }, [isOpen, cardSettled, wishText]);
 
   return (
     <motion.div
@@ -553,14 +600,17 @@ function Stage3GreetingCard({ student, onNextStage }) {
             </p>
           </motion.div>
         ) : (
-          /* Smooth Unfolding / Opening Greeting Card Animation */
+          /* Smooth Slide-Down Entrance Greeting Card Opening Animation */
           <motion.div
-            initial={{ rotateX: -70, y: 50, scale: 0.85, opacity: 0 }}
-            animate={{ rotateX: 0, y: 0, scale: 1, opacity: 1 }}
+            initial={{ y: -160, opacity: 0, scale: 0.9, rotateX: -15 }}
+            animate={{ y: 0, opacity: 1, scale: 1, rotateX: 0 }}
             transition={{
-              duration: 1.0,
-              ease: [0.16, 1, 0.3, 1], // Gentle spring curve
+              type: "spring",
+              damping: 18,
+              stiffness: 110,
+              mass: 0.9,
             }}
+            onAnimationComplete={() => setCardSettled(true)}
             style={{ transformOrigin: "top center", transformStyle: "preserve-3d" }}
             className="w-full min-h-[310px] rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 shadow-2xl flex flex-col justify-between relative select-none"
           >
