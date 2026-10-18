@@ -331,6 +331,16 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(0);
   const [showHonorCard, setShowHonorCard] = useState(false);
   const [giftRevealed, setGiftRevealed] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  const scrollRef = useRef(null);
+
+  const checkScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const atBottom = (scrollHeight - clientHeight <= 10) || (scrollTop + clientHeight >= scrollHeight - 15);
+    setIsAtBottom(atBottom);
+  }, []);
 
   useEffect(() => {
     async function fetchStudent() {
@@ -361,6 +371,16 @@ export default function App() {
 
     fetchStudent();
   }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+    const timer = setTimeout(() => {
+      checkScroll();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [activeTab, giftRevealed, checkScroll, loading, showHonorCard]);
 
   const handleOpenHonorCard = useCallback(() => {
     confetti({
@@ -406,7 +426,11 @@ export default function App() {
             <FloatingStickers />
 
             {/* Scrollable Content Container */}
-            <div className="flex-1 overflow-y-auto relative z-10 flex flex-col justify-between">
+            <div
+              ref={scrollRef}
+              onScroll={checkScroll}
+              className="flex-1 overflow-y-auto relative z-10 flex flex-col pb-20"
+            >
               <AnimatePresence mode="wait">
                 {activeTab === 0 && (
                   <motion.div
@@ -596,79 +620,82 @@ export default function App() {
                         )}
                       </AnimatePresence>
                     </div>
+
+                    {/* Honor Card Button cleanly integrated into the final tab view */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleOpenHonorCard}
+                      className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all border border-pink-300/40 mt-2"
+                      style={{
+                        background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
+                        boxShadow: '0 4px 20px rgba(236, 72, 153, 0.5)',
+                      }}
+                    >
+                      <span>Nhận Thẻ Vinh Danh (9:16) ✨</span>
+                      <motion.span
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                      >
+                        <ArrowRightIcon />
+                      </motion.span>
+                    </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
 
-              {/* Bottom Navigation Bar (Non-sticky, placed at absolute bottom of scrollable content) */}
-              <div className="shrink-0 pt-4 pb-2 flex flex-col gap-2 mt-auto">
-                {isLastTab && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleOpenHonorCard}
-                    className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all border border-pink-300/40"
-                    style={{
-                      background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
-                      boxShadow: '0 4px 20px rgba(236, 72, 153, 0.5)',
-                    }}
-                  >
-                    <span>Nhận Thẻ Vinh Danh (9:16) ✨</span>
-                    <motion.span
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                    >
-                      <ArrowRightIcon />
-                    </motion.span>
-                  </motion.button>
-                )}
+            {/* Bottom Navigation Bar - Hidden during scrolling, appears at absolute bottom */}
+            <div
+              className={`absolute bottom-4 left-4 right-4 z-20 transition-all duration-300 ${
+                isAtBottom ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+              }`}
+            >
+              <div className="flex items-center justify-between px-3 py-2 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
+                {/* Left Arrow Button */}
+                <button
+                  onClick={() => setActiveTab(prev => Math.max(0, prev - 1))}
+                  disabled={activeTab === 0}
+                  className={`p-2 rounded-xl transition-all flex items-center justify-center ${
+                    activeTab === 0
+                      ? 'opacity-30 cursor-not-allowed text-white/40'
+                      : 'text-white hover:bg-white/15 cursor-pointer active:scale-95'
+                  }`}
+                  aria-label="Previous Tab"
+                >
+                  <ArrowLeftIcon />
+                </button>
 
-                <div className="flex items-center justify-between px-3 py-2 bg-black/30 backdrop-blur-md rounded-2xl border border-white/10">
-                  {/* Left Arrow Button */}
-                  <button
-                    onClick={() => setActiveTab(prev => Math.max(0, prev - 1))}
-                    disabled={activeTab === 0}
-                    className={`p-2 rounded-xl transition-all flex items-center justify-center ${
-                      activeTab === 0
-                        ? 'opacity-30 cursor-not-allowed text-white/40'
-                        : 'text-white hover:bg-white/15 cursor-pointer active:scale-95'
-                    }`}
-                    aria-label="Previous Tab"
-                  >
-                    <ArrowLeftIcon />
-                  </button>
-
-                  {/* Pagination Dots */}
-                  <div className="flex items-center gap-2">
-                    {TABS.map((tab, idx) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(idx)}
-                        className={`h-2.5 rounded-full transition-all cursor-pointer ${
-                          activeTab === idx
-                            ? 'w-6 bg-gradient-to-r from-pink-400 to-rose-400'
-                            : 'w-2.5 bg-white/30 hover:bg-white/50'
-                        }`}
-                        aria-label={`Go to ${tab.label}`}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Right Arrow Button */}
-                  <button
-                    onClick={() => {
-                      if (!isLastTab) {
-                        setActiveTab(prev => Math.min(TABS.length - 1, prev + 1));
-                      } else {
-                        handleOpenHonorCard();
-                      }
-                    }}
-                    className="p-2 rounded-xl text-white hover:bg-white/15 cursor-pointer active:scale-95 transition-all flex items-center justify-center"
-                    aria-label={isLastTab ? "Nhận Thẻ Vinh Danh" : "Next Tab"}
-                  >
-                    <ArrowRightIcon />
-                  </button>
+                {/* Pagination Dots */}
+                <div className="flex items-center gap-2">
+                  {TABS.map((tab, idx) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(idx)}
+                      className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                        activeTab === idx
+                          ? 'w-6 bg-gradient-to-r from-pink-400 to-rose-400'
+                          : 'w-2.5 bg-white/30 hover:bg-white/50'
+                      }`}
+                      aria-label={`Go to ${tab.label}`}
+                    />
+                  ))}
                 </div>
+
+                {/* Right Arrow Button */}
+                <button
+                  onClick={() => {
+                    if (!isLastTab) {
+                      setActiveTab(prev => Math.min(TABS.length - 1, prev + 1));
+                    } else {
+                      handleOpenHonorCard();
+                    }
+                  }}
+                  className="p-2 rounded-xl text-white hover:bg-white/15 cursor-pointer active:scale-95 transition-all flex items-center justify-center"
+                  aria-label={isLastTab ? "Nhận Thẻ Vinh Danh" : "Next Tab"}
+                >
+                  <ArrowRightIcon />
+                </button>
               </div>
             </div>
 
