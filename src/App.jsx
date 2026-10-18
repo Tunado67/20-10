@@ -20,20 +20,13 @@ const FALLBACK = {
     'Gửi tới bạn những tia nắng ấm áp nhất và ngàn nụ cười rạng rỡ ✨',
     'Cảm ơn vì sự hiện diện đáng yêu của bạn luôn mang lại niềm vui cho mọi người 🌹'
   ],
-  letter_content: `Thân gửi bạn,\n\nNhân ngày Phụ nữ Việt Nam 20/10, chúc bạn luôn tràn đầy năng lượng tích cực, luôn yêu thương bản thân và gặt hái thật nhiều thành công.\n\nHãy luôn giữ trọn nụ cười rạng rỡ và tỏa sáng theo cách riêng của bạn nhé! ✨🌸`,
   wishes: [
     {
-      from: 'Tập thể Lớp',
+      from: 'Tập thể Lớp 12A',
       avatar: 'https://ui-avatars.com/api/?name=Nam+Sinh&background=0284c7&color=fff',
       text: 'Chúc bạn ngày 20/10 luôn xinh đẹp, tràn ngập nụ cười và học tốt!'
-    },
-    {
-      from: 'Bí Thư',
-      avatar: 'https://ui-avatars.com/api/?name=Tuan+Anh&background=4f46e5&color=fff',
-      text: 'Chúc bạn 20/10 luôn rực rỡ như hoa hướng dương 🌻'
     }
-  ],
-  gift: '🌹 Hoa hồng tươi & Thẻ quà tặng đặc biệt 🎁'
+  ]
 };
 
 // ─────────────────────────────────────────────
@@ -221,8 +214,8 @@ function Stage1EnchantedRose({ onRoseTap }) {
 // ─────────────────────────────────────────────
 // STAGE 2: Mini Flip Card & Large Centered Bouquet
 // 1) Mini Card Page-Flipping Messages: Tapping card flips smoothly to next message chunk.
-// 2) Large Centered Bouquet: Once pages completed and user clicks continue (or flips last page),
-//    display large bouquet in the center blooming slowly & gracefully.
+// 2) Large Centered Bouquet: After flipping through all message pages and clicking continue,
+//    display a large bouquet of flowers positioned right in the center of the screen, blooming slowly and gracefully.
 // 3) Bottom button: "Mở Thẻ Vinh Danh ✈️ →"
 // ─────────────────────────────────────────────
 function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
@@ -457,15 +450,16 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
 }
 
 // ─────────────────────────────────────────────
-// STAGE 3: Redesigned Honor Card (Visa Passport / Boarding Pass Style)
-// Direct transition from Stage 2 (photo gallery removed).
-// Strictly uses required container styles:
+// STAGE 3: Honor Card Redesign (Visa Passport / Boarding Pass Style)
+// Direct transition from Stage 2 bouquet (Skip photo gallery).
+// Container:
 // w-full aspect-[9/16] max-h-[65vh] rounded-3xl p-6 bg-gradient-to-br from-slate-900 via-rose-950 to-purple-950 border border-pink-500/30 shadow-2xl flex flex-col justify-between relative overflow-hidden text-center mx-auto
-// Features avatar photo, student name, general class wishes, personalized sticker icons around the card,
-// and corner departure/customs seal stamp stamping down with text: "CÔ GÁI CỦA NĂM".
-// Staggered animations using Framer Motion. Fully functional html2canvas download & restart buttons.
+// Content: Avatar, student name, general class wishes, personalized sticker icons arranged naturally around card matching traits.
+// Customs departure seal stamp "CÔ GÁI CỦA NĂM" animated stamping down at corner.
+// Staggered framer-motion animations.
+// Fully functional html2canvas PNG download button & restart button.
 // ─────────────────────────────────────────────
-function Stage3HonorCardPassport({ student, onRestart }) {
+function Stage3HonorVisaCard({ student, onRestart }) {
   const cardRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
   const [done, setDone] = useState(false);
@@ -474,7 +468,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
   const stickers = studentData.stickers && studentData.stickers.length > 0 ? studentData.stickers : FALLBACK.stickers;
   const wishesList = studentData.wishes && studentData.wishes.length > 0 ? studentData.wishes : FALLBACK.wishes;
 
-  // Staggered variants for Passport Card elements
+  // Staggered framer-motion animation variants
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.92 },
     visible: {
@@ -482,7 +476,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
       scale: 1,
       transition: {
         duration: 0.6,
-        staggerChildren: 0.2,
+        staggerChildren: 0.18,
       },
     },
   };
@@ -498,7 +492,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
       opacity: 0.95,
       scale: 1,
       rotate: -12,
-      transition: { delay: 1.2, duration: 0.5, type: 'spring', stiffness: 220, damping: 15 },
+      transition: { delay: 1.1, duration: 0.5, type: 'spring', stiffness: 220, damping: 15 },
     },
   };
 
@@ -518,7 +512,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
           reader.readAsDataURL(blob);
         });
       } catch {
-        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || 'Hoa')}&background=be185d&color=fff&size=256`;
+        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || 'Hoa')}&background=e11d48&color=fff&size=256`;
       }
 
       const imgEl = cardRef.current.querySelector('img');
@@ -539,7 +533,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
 
       const link = document.createElement('a');
       link.href = canvas.toDataURL('image/png');
-      link.download = `Passport-Vinh-Danh-${(studentData.name || 'Hoa').replace(/\s+/g, '-')}.png`;
+      link.download = `Visa-Vinh-Danh-${(studentData.name || 'Hoa').replace(/\s+/g, '-')}.png`;
       link.click();
       setDone(true);
       setTimeout(() => setDone(false), 3000);
@@ -548,7 +542,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
         particleCount: 110,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ['#ec4899', '#f9a8d4', '#fbbf24', '#ffffff'],
+        colors: ['#f43f5e', '#fbbf24', '#ec4899', '#a855f7'],
       });
     } catch (err) {
       console.error('html2canvas download error:', err);
@@ -576,7 +570,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
         </span>
       </div>
 
-      {/* Visa Passport / Boarding Pass Styled Honor Card */}
+      {/* Visa Passport / Boarding Pass Card */}
       <motion.div
         ref={cardRef}
         variants={containerVariants}
@@ -584,110 +578,125 @@ function Stage3HonorCardPassport({ student, onRestart }) {
         animate="visible"
         className="w-full aspect-[9/16] max-h-[65vh] rounded-3xl p-6 bg-gradient-to-br from-slate-900 via-rose-950 to-purple-950 border border-pink-500/30 shadow-2xl flex flex-col justify-between relative overflow-hidden text-center mx-auto my-auto z-10"
       >
-        {/* Background Aviation Graphics */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+        {/* Subtle Watermark Plane Pattern */}
+        <div className="absolute top-0 right-0 w-36 h-36 bg-pink-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Personalized Sticker Icons arranged naturally around card edges */}
-        <motion.div variants={itemVariants} className="absolute top-12 left-4 text-xl select-none opacity-90 drop-shadow">
+        {/* Personalized Sticker Icons arranged naturally around card */}
+        <motion.div
+          variants={itemVariants}
+          className="absolute top-10 left-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[-12deg]"
+        >
           {stickers[0] || '🌸'}
         </motion.div>
-        <motion.div variants={itemVariants} className="absolute top-12 right-4 text-xl select-none opacity-90 drop-shadow">
+        <motion.div
+          variants={itemVariants}
+          className="absolute top-10 right-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[15deg]"
+        >
           {stickers[1] || '✨'}
         </motion.div>
-        <motion.div variants={itemVariants} className="absolute bottom-16 left-4 text-xl select-none opacity-90 drop-shadow">
+        <motion.div
+          variants={itemVariants}
+          className="absolute bottom-16 left-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[8deg]"
+        >
           {stickers[2] || '👑'}
         </motion.div>
-        <motion.div variants={itemVariants} className="absolute bottom-16 right-4 text-xl select-none opacity-90 drop-shadow">
+        <motion.div
+          variants={itemVariants}
+          className="absolute bottom-16 right-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[-18deg]"
+        >
           {stickers[3] || '💖'}
         </motion.div>
 
-        {/* Boarding Pass Top Header */}
-        <motion.div variants={itemVariants} className="flex justify-between items-center text-[10px] tracking-widest uppercase font-bold text-pink-300/90 z-10 border-b border-pink-500/20 pb-2">
-          <div className="flex items-center gap-1">
-            <span>✈️</span>
-            <span>AIR 20-10 VISA</span>
+        {/* Boarding Pass Top Header Accent */}
+        <motion.div
+          variants={itemVariants}
+          className="flex justify-between items-center text-[10px] tracking-widest uppercase font-extrabold text-pink-300 z-10 border-b border-pink-500/30 pb-2.5"
+        >
+          <div className="flex items-center gap-1.5 text-amber-200">
+            <span className="text-sm">✈️</span>
+            <span>20-10 OFFICIAL VISA</span>
           </div>
-          <div className="bg-pink-500/20 border border-pink-400/30 px-2 py-0.5 rounded-md text-[9px] text-amber-200">
+          <div className="bg-rose-600/80 text-white font-black px-2.5 py-0.5 rounded-md text-[9px] tracking-wider shadow-xs border border-rose-400/40">
             CLASS: VIP
           </div>
         </motion.div>
 
-        {/* Passport Main Section (Avatar, Name, Title, Wishes) */}
+        {/* Passport Main Section (Avatar, Name, Traits, Wishes) */}
         <div className="flex flex-col items-center justify-center gap-2 my-auto z-10">
-          {/* Avatar Photo with Passport Frame */}
+          {/* Main Student Avatar Photo */}
           <motion.div variants={itemVariants} className="relative">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-pink-400/80 p-1 bg-slate-900 shadow-xl mx-auto overflow-hidden shrink-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-300/80 p-1 bg-slate-900 shadow-xl mx-auto overflow-hidden shrink-0">
               <img
                 src={studentData.avatar_url || FALLBACK.avatar_url}
                 alt={studentData.name}
                 className="w-full h-full object-cover rounded-xl"
                 crossOrigin="anonymous"
                 onError={e => {
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || 'Hoa')}&background=be185d&color=fff&size=256`;
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || 'Hoa')}&background=e11d48&color=fff&size=256`;
                 }}
               />
             </div>
-            {/* Sticker icon top right of avatar frame */}
-            <span className="absolute -top-2 -right-2 text-base select-none">
+            {/* Sticker on avatar frame */}
+            <span className="absolute -top-3 -right-3 text-xl bg-slate-900/90 p-1 rounded-full border border-amber-300/60 shadow-md select-none rotate-12">
               {stickers[4] || '🎓'}
             </span>
           </motion.div>
 
           {/* Student Name */}
-          <motion.h2 variants={itemVariants} className="text-lg sm:text-xl font-black text-white leading-tight drop-shadow-md mt-1">
+          <motion.h2 variants={itemVariants} className="text-lg sm:text-xl font-black text-amber-200 leading-tight drop-shadow-md mt-1">
             {studentData.name || FALLBACK.name}
           </motion.h2>
 
-          {/* Student Vibe / Title */}
-          <motion.div variants={itemVariants} className="bg-white/10 border border-white/20 rounded-full px-3 py-0.5 text-[10px] font-bold tracking-wider uppercase text-amber-200 shrink-0">
+          {/* Individual Traits Badge */}
+          <motion.div variants={itemVariants} className="bg-pink-500/20 border border-pink-400/40 rounded-full px-3 py-0.5 text-[10px] font-extrabold tracking-wider uppercase text-pink-200 shrink-0 shadow-xs">
             {studentData.vibe || studentData.title || FALLBACK.vibe}
           </motion.div>
 
           {/* General Class Wishes Box */}
-          <motion.div variants={itemVariants} className="bg-black/40 border border-pink-500/20 rounded-xl p-2.5 max-w-[240px] w-full text-center mt-1">
-            <p className="text-[9px] uppercase font-bold text-pink-300 tracking-wider mb-1 flex items-center justify-center gap-1">
+          <motion.div variants={itemVariants} className="bg-black/40 border border-white/10 rounded-xl p-2.5 max-w-[240px] w-full text-center mt-1 shadow-inner backdrop-blur-xs">
+            <p className="text-[9px] uppercase font-black text-amber-300 tracking-wider mb-1 flex items-center justify-center gap-1">
               <span>💌</span> LỜI CHÚC TỪ TẬP THỂ
             </p>
-            <p className="text-[10px] text-pink-100/90 font-medium leading-relaxed italic line-clamp-2">
+            <p className="text-[10px] text-pink-100 font-medium leading-relaxed italic line-clamp-2">
               "{wishesList[0]?.text || studentData.quote || FALLBACK.quote}"
             </p>
           </motion.div>
         </div>
 
-        {/* Official Customs/Departure Seal Stamp Effect */}
+        {/* Custom Departure/Customs Seal Stamp Effect ("CÔ GÁI CỦA NĂM") */}
         <motion.div
           variants={stampVariants}
-          className="absolute bottom-10 right-4 z-20 pointer-events-none"
+          className="absolute bottom-10 right-3 z-20 pointer-events-none"
         >
-          <div className="w-22 h-22 sm:w-24 sm:h-24 rounded-full border-2 border-dashed border-rose-500 text-rose-400 bg-rose-950/60 backdrop-blur-xs flex flex-col items-center justify-center p-1 text-center shadow-2xl rotate-[-12deg]">
-            <span className="text-[7px] font-black uppercase tracking-widest text-amber-300">★ APPROVED ★</span>
-            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-rose-200 leading-tight my-0.5">
+          <div className="w-22 h-22 sm:w-24 sm:h-24 rounded-full border-2 border-dashed border-amber-400 text-amber-300 bg-rose-950/90 backdrop-blur-xs flex flex-col items-center justify-center p-1 text-center shadow-2xl rotate-[-12deg]">
+            <span className="text-[7px] font-black uppercase tracking-widest text-pink-200">★ APPROVED ★</span>
+            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-300 leading-tight my-0.5 drop-shadow-md">
               CÔ GÁI<br />CỦA NĂM
             </span>
-            <span className="text-[7px] font-bold text-pink-300">20/10 VISA</span>
+            <span className="text-[7px] font-bold text-pink-200">20/10 VISA</span>
           </div>
         </motion.div>
 
         {/* Boarding Pass Bottom Barcode & Footer */}
-        <motion.div variants={itemVariants} className="pt-2 border-t border-pink-500/20 text-center z-10">
-          <div className="flex justify-between items-center text-[8px] text-pink-300/70 font-mono tracking-wider mb-1">
+        <motion.div variants={itemVariants} className="pt-2 border-t border-pink-500/30 text-center z-10">
+          <div className="flex justify-between items-center text-[8px] text-pink-300/80 font-mono font-bold tracking-wider mb-1">
             <span>PASSPORT NO: 2010-2025</span>
             <span>GATE: LOVE-01</span>
           </div>
-          <div className="w-full h-4 bg-white/10 rounded flex items-center justify-center gap-1 overflow-hidden opacity-60">
+          <div className="w-full h-4 bg-amber-100/90 rounded flex items-center justify-center gap-1 overflow-hidden opacity-90">
             {Array.from({ length: 28 }).map((_, i) => (
               <div
                 key={i}
-                className="h-full bg-pink-200"
-                style={{ width: `${(i % 3) * 2 + 1}px`, opacity: i % 2 === 0 ? 0.9 : 0.4 }}
+                className="h-full bg-slate-900"
+                style={{ width: `${(i % 3) * 2 + 1}px`, opacity: i % 2 === 0 ? 1 : 0.4 }}
               />
             ))}
           </div>
         </motion.div>
       </motion.div>
 
-      {/* Action Buttons: html2canvas PNG download & restart */}
+      {/* Actions: html2canvas PNG download button & restart button */}
       <div className="w-full max-w-xs flex flex-col gap-2 z-10 pb-2 shrink-0">
         <motion.button
           onClick={handleDownload}
@@ -697,7 +706,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
           style={{
             background: done
               ? 'linear-gradient(135deg, #16a34a, #15803d)'
-              : 'linear-gradient(135deg, #be185d, #9d174d)',
+              : 'linear-gradient(135deg, #e11d48, #be123c)',
             opacity: downloading ? 0.7 : 1,
           }}
         >
@@ -709,13 +718,13 @@ function Stage3HonorCardPassport({ student, onRestart }) {
               >
                 ⏳
               </motion.span>
-              Đang tạo Passport Vinh Danh…
+              Đang tạo Visa Vinh Danh…
             </>
           ) : done ? (
-            <>✅ Đã tải Thẻ Vinh Danh (.png)!</>
+            <>✅ Đã tải Visa Vinh Danh (.png)!</>
           ) : (
             <>
-              📥 Tải ảnh Vinh Danh (.png)
+              📥 Tải ảnh Visa Vinh Danh (.png)
             </>
           )}
         </motion.button>
@@ -723,7 +732,7 @@ function Stage3HonorCardPassport({ student, onRestart }) {
         <motion.button
           onClick={onRestart}
           whileTap={{ scale: 0.95 }}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs text-rose-200 bg-white/10 hover:bg-white/15 border border-white/15 cursor-pointer transition-all"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs text-pink-200 bg-white/10 hover:bg-white/15 border border-white/15 cursor-pointer transition-all"
         >
           ← Xem lại từ đầu
         </motion.button>
@@ -814,7 +823,7 @@ export default function App() {
             )}
 
             {currentStage === 3 && (
-              <Stage3HonorCardPassport
+              <Stage3HonorVisaCard
                 student={student}
                 onRestart={handleRestart}
               />
