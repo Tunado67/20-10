@@ -60,7 +60,7 @@ const FALLBACK = {
 };
 
 // ─────────────────────────────────────────────
-// Floating Ambient Particles / Petals Component
+// Floating Ambient Particles Component
 // ─────────────────────────────────────────────
 const BACKGROUND_EMOJIS = ['✨', '🌸', '💖', '🎀', '🌺', '🌷', '✨', '🌹'];
 
@@ -99,6 +99,7 @@ function AmbientParticles() {
 
 // ─────────────────────────────────────────────
 // STAGE 1: Enchanted Glass Rose (100vh)
+// Gentle 1.5s fade-in animation, glowing prompt, tap to flash transition
 // ─────────────────────────────────────────────
 function Stage1EnchantedRose({ onRoseTap }) {
   const [flashing, setFlashing] = useState(false);
@@ -108,7 +109,7 @@ function Stage1EnchantedRose({ onRoseTap }) {
     setFlashing(true);
     setTimeout(() => {
       onRoseTap();
-    }, 500);
+    }, 600);
   };
 
   return (
@@ -117,20 +118,20 @@ function Stage1EnchantedRose({ onRoseTap }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 1.5, ease: 'easeOut' }} // Gentle slow duration-1500 fade in
       className="absolute inset-0 z-20 flex flex-col items-center justify-between py-12 px-6 bg-slate-950 text-white select-none overflow-hidden"
     >
-      {/* Flash Effect Overlay */}
+      {/* Flash Effect Overlay on Tap */}
       {flashing && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: [0, 1, 0.8] }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
           className="absolute inset-0 bg-white z-50 pointer-events-none"
         />
       )}
 
-      {/* Floating Glimmer Stars Background */}
+      {/* Floating Glimmer Stars */}
       <div className="absolute inset-0 pointer-events-none">
         {Array.from({ length: 18 }).map((_, i) => (
           <div
@@ -154,7 +155,7 @@ function Stage1EnchantedRose({ onRoseTap }) {
         <motion.span
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.4, duration: 1 }}
           className="text-amber-300 text-[11px] font-bold tracking-[0.2em] uppercase px-3 py-1 rounded-full bg-white/5 border border-amber-300/20 backdrop-blur-md"
         >
           ✨ BẢO TÀNG HOA HỒNG BẤT TỬ ✨
@@ -162,29 +163,25 @@ function Stage1EnchantedRose({ onRoseTap }) {
         <motion.h1
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.7, duration: 1 }}
           className="text-xl sm:text-2xl font-black mt-3 bg-gradient-to-r from-pink-200 via-rose-300 to-amber-200 bg-clip-text text-transparent drop-shadow-lg"
         >
           Lồng Kính Diệu Kỳ
         </motion.h1>
       </div>
 
-      {/* Glass Dome & Rose Container */}
+      {/* Glass Dome & Glowing Rose */}
       <motion.div
         whileTap={{ scale: 0.95 }}
         onClick={handleTap}
         className="relative z-10 cursor-pointer my-auto flex flex-col items-center group"
       >
-        {/* Soft Aura behind Dome */}
         <div className="absolute w-56 h-72 rounded-full bg-rose-600/25 blur-3xl -z-10 group-hover:bg-pink-500/35 transition-all duration-500" />
 
-        {/* Dome Structure */}
         <div className="relative w-52 sm:w-60 h-72 sm:h-80 rounded-t-full rounded-b-3xl glass-dome flex flex-col items-center justify-end pb-8 px-4 border border-white/30 shadow-2xl overflow-hidden">
-          {/* Glass Specular Light Reflection Lines */}
           <div className="absolute top-4 left-6 w-3 h-40 bg-gradient-to-b from-white/60 via-white/10 to-transparent rounded-full rotate-[-12deg] pointer-events-none" />
           <div className="absolute top-8 right-8 w-1.5 h-28 bg-gradient-to-b from-white/40 via-white/5 to-transparent rounded-full rotate-[8deg] pointer-events-none" />
 
-          {/* Floating Magic Glimmers inside Dome */}
           <motion.div
             animate={{ y: [-5, 5, -5] }}
             transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
@@ -207,14 +204,12 @@ function Stage1EnchantedRose({ onRoseTap }) {
             ✨
           </motion.div>
 
-          {/* Glowing Rose */}
           <div className="rose-glow mb-2 text-center select-none">
             <span className="text-7xl sm:text-8xl block filter drop-shadow-[0_0_25px_rgba(244,63,94,0.9)]">
               🌹
             </span>
           </div>
 
-          {/* Petals Fallen on Dome Wooden Pedestal */}
           <div className="flex gap-2 text-sm opacity-80 mt-1">
             <span className="rotate-[-25deg] transform translate-y-1">🥀</span>
             <span className="rotate-[15deg] transform translate-y-2">🌸</span>
@@ -222,13 +217,12 @@ function Stage1EnchantedRose({ onRoseTap }) {
           </div>
         </div>
 
-        {/* Pedestal Base */}
         <div className="w-60 sm:w-68 h-5 bg-gradient-to-r from-amber-950 via-amber-900 to-amber-950 rounded-lg shadow-2xl border-t border-amber-700/60 -mt-1 flex items-center justify-center">
           <div className="w-48 h-1 bg-amber-600/40 rounded-full" />
         </div>
       </motion.div>
 
-      {/* Tap Prompt */}
+      {/* Prompt Text */}
       <div className="z-10 text-center pb-2 flex flex-col items-center gap-2">
         <motion.p
           animate={{ scale: [1, 1.05, 1] }}
@@ -247,50 +241,38 @@ function Stage1EnchantedRose({ onRoseTap }) {
 }
 
 // ─────────────────────────────────────────────
-// STAGE 2: Soothing Sky & Typewriter Messages & Blooming Bouquet
+// STAGE 2: Sky Messages & Slower Blooming Bouquet
+// Sequential messages fade in, stay briefly, and fade out COMPLETELY before next message.
+// Slow gentle bouquet bloom.
 // ─────────────────────────────────────────────
 function Stage2SoothingSky({ skyMessages, onNextStage }) {
   const [displayedIndex, setDisplayedIndex] = useState(0);
-  const [typedText, setTypedText] = useState('');
   const [messagesDone, setMessagesDone] = useState(false);
-  const [flowerStage, setFlowerStage] = useState(0); // 0 to 4 blooming step
+  const [flowerStage, setFlowerStage] = useState(0);
 
-  const currentMessage = skyMessages[displayedIndex] || skyMessages[0];
-
-  // Typewriter effect for current sky message
+  // Sequential message timer: Each message fades in, displays for 2.5s, then advances
   useEffect(() => {
     if (messagesDone) return;
-    let charIdx = 0;
-    setTypedText('');
 
-    const interval = setInterval(() => {
-      if (charIdx < currentMessage.length) {
-        setTypedText(currentMessage.slice(0, charIdx + 1));
-        charIdx++;
+    const timer = setTimeout(() => {
+      if (displayedIndex < skyMessages.length - 1) {
+        setDisplayedIndex(prev => prev + 1);
       } else {
-        clearInterval(interval);
-        // Wait before showing next message or finishing messages
-        setTimeout(() => {
-          if (displayedIndex < skyMessages.length - 1) {
-            setDisplayedIndex(prev => prev + 1);
-          } else {
-            setMessagesDone(true);
-          }
-        }, 1200);
+        setMessagesDone(true);
       }
-    }, 45);
+    }, 3200);
 
-    return () => clearInterval(interval);
-  }, [displayedIndex, currentMessage, skyMessages.length, messagesDone]);
+    return () => clearTimeout(timer);
+  }, [displayedIndex, skyMessages.length, messagesDone]);
 
-  // Flower blooming sequence once messages finish
+  // Slower, gentle bouquet bloom timing
   useEffect(() => {
     if (!messagesDone) return;
     const timers = [];
-    timers.push(setTimeout(() => setFlowerStage(1), 400));
-    timers.push(setTimeout(() => setFlowerStage(2), 1000));
-    timers.push(setTimeout(() => setFlowerStage(3), 1600));
-    timers.push(setTimeout(() => setFlowerStage(4), 2200));
+    timers.push(setTimeout(() => setFlowerStage(1), 800));
+    timers.push(setTimeout(() => setFlowerStage(2), 2000));
+    timers.push(setTimeout(() => setFlowerStage(3), 3200));
+    timers.push(setTimeout(() => setFlowerStage(4), 4400));
 
     return () => timers.forEach(t => clearTimeout(t));
   }, [messagesDone]);
@@ -301,7 +283,7 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.8 }}
       className="absolute inset-0 z-20 flex flex-col justify-between p-6 bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950 text-white overflow-hidden"
     >
       <AmbientParticles />
@@ -313,60 +295,53 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
         </span>
       </div>
 
-      {/* Messages Container */}
-      <div className="z-10 my-auto flex flex-col items-center gap-4 w-full max-w-xs mx-auto text-center min-h-[140px] justify-center">
-        {skyMessages.slice(0, displayedIndex).map((msg, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 0.85, y: 0 }}
-            className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-xs text-pink-100 shadow-md w-full"
-          >
-            {msg}
-          </motion.div>
-        ))}
-
-        {!messagesDone && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-gradient-to-r from-rose-900/80 to-purple-900/80 backdrop-blur-lg rounded-2xl border border-pink-400/30 text-sm text-white font-medium shadow-xl w-full text-glow"
-          >
-            <span className="typing-cursor">{typedText}</span>
-          </motion.div>
-        )}
+      {/* Sequential Messages: Each message fades in and fades out completely */}
+      <div className="z-10 my-auto flex flex-col items-center justify-center min-h-[160px] w-full max-w-xs mx-auto text-center">
+        <AnimatePresence mode="wait">
+          {!messagesDone && (
+            <motion.div
+              key={`msg-${displayedIndex}`}
+              initial={{ opacity: 0, y: 15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.95 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+              className="p-5 bg-gradient-to-r from-rose-900/80 to-purple-900/80 backdrop-blur-lg rounded-2xl border border-pink-400/30 text-sm sm:text-base text-pink-100 font-medium shadow-2xl w-full text-glow leading-relaxed"
+            >
+              {skyMessages[displayedIndex]}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Blooming Flower Bouquet Section */}
-      <div className="z-10 flex flex-col items-center justify-center my-auto min-h-[160px]">
+      {/* Slower Blooming Bouquet */}
+      <div className="z-10 flex flex-col items-center justify-center my-auto min-h-[180px]">
         {messagesDone ? (
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 1.2, ease: 'easeOut' }}
             className="flex flex-col items-center gap-2"
           >
-            {/* Flower bouquet blooming steps */}
-            <div className="relative w-36 h-36 flex items-center justify-center">
+            <div className="relative w-40 h-40 flex items-center justify-center">
               {/* Center Main Flower */}
               <motion.span
                 animate={{
-                  scale: flowerStage >= 1 ? [0.2, 1.2, 1] : 0,
+                  scale: flowerStage >= 1 ? [0, 1.25, 1] : 0,
                   rotate: flowerStage >= 1 ? 0 : -45
                 }}
-                transition={{ duration: 0.6 }}
-                className="text-6xl z-20 absolute filter drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]"
+                transition={{ duration: 1.2, ease: 'easeOut' }}
+                className="text-6xl sm:text-7xl z-20 absolute filter drop-shadow-[0_0_20px_rgba(244,63,94,0.8)]"
               >
                 🌺
               </motion.span>
 
-              {/* Side Flowers blooming sequentially */}
+              {/* Side Flowers blooming sequentially with slow gentle transitions */}
               {flowerStage >= 2 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: -38, y: -20, rotate: -20 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                  className="text-4xl absolute z-10"
+                  animate={{ scale: 1, x: -42, y: -22, rotate: -20 }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                  className="text-4xl sm:text-5xl absolute z-10"
                 >
                   🌸
                 </motion.span>
@@ -374,9 +349,9 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
               {flowerStage >= 2 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: 38, y: -20, rotate: 20 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                  className="text-4xl absolute z-10"
+                  animate={{ scale: 1, x: 42, y: -22, rotate: 20 }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                  className="text-4xl sm:text-5xl absolute z-10"
                 >
                   🌷
                 </motion.span>
@@ -384,9 +359,9 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
               {flowerStage >= 3 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: -28, y: 25, rotate: -35 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                  className="text-3xl absolute z-10"
+                  animate={{ scale: 1, x: -32, y: 28, rotate: -35 }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                  className="text-3xl sm:text-4xl absolute z-10"
                 >
                   🌹
                 </motion.span>
@@ -394,9 +369,9 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
               {flowerStage >= 3 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: 28, y: 25, rotate: 35 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                  className="text-3xl absolute z-10"
+                  animate={{ scale: 1, x: 32, y: 28, rotate: 35 }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                  className="text-3xl sm:text-4xl absolute z-10"
                 >
                   🌻
                 </motion.span>
@@ -404,8 +379,8 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
               {flowerStage >= 4 && (
                 <motion.span
                   initial={{ scale: 0 }}
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.5 }}
                   className="text-2xl absolute -top-4 text-amber-300 z-30"
                 >
                   ✨
@@ -414,15 +389,15 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
             </div>
 
             <p className="text-xs font-bold text-pink-200 tracking-wide mt-2">
-              {flowerStage < 4 ? 'Đó hoa đang nở rộ… 🌸' : 'Bó hoa tươi thắm tỏa ngát hương! 💐'}
+              {flowerStage < 4 ? 'Đóa hoa đang từ từ nở rộ… 🌸' : 'Bó hoa tươi thắm rực rỡ tỏa ngát hương! 💐'}
             </p>
           </motion.div>
         ) : (
-          <p className="text-[11px] text-pink-300/60 italic">Đang tải câu từ yêu thương…</p>
+          <p className="text-[11px] text-pink-300/60 italic">Đang tải những câu từ yêu thương…</p>
         )}
       </div>
 
-      {/* Action Button */}
+      {/* Button: "Mở Thiệp Chúc ✉️ →" */}
       <div className="z-10 pb-4">
         {flowerStage >= 4 && (
           <motion.button
@@ -433,7 +408,7 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
             onClick={onNextStage}
             className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
           >
-            <span>Xem Thiệp Lời Chúc ✉️</span>
+            <span>Mở Thiệp Chúc ✉️</span>
             <motion.span
               animate={{ x: [0, 4, 0] }}
               transition={{ repeat: Infinity, duration: 1.2 }}
@@ -449,6 +424,8 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
 
 // ─────────────────────────────────────────────
 // STAGE 3: Sealed Envelope & Typewriter Letter
+// Displays sealed envelope, tapping wax seal opens letter and types content smoothly.
+// Button: "Xem Kỷ Niệm →"
 // ─────────────────────────────────────────────
 function Stage3SealedEnvelope({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -468,7 +445,6 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
     });
   };
 
-  // Letter typewriter effect
   useEffect(() => {
     if (!isOpen) return;
     let index = 0;
@@ -493,7 +469,7 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.6 }}
       className="absolute inset-0 z-20 flex flex-col justify-between p-5 bg-gradient-to-b from-slate-950 via-rose-950 to-purple-950 text-white overflow-y-auto no-scrollbar"
     >
       <AmbientParticles />
@@ -505,19 +481,15 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
         </span>
       </div>
 
-      {/* Envelope & Letter Container */}
+      {/* Sealed Envelope / Unfolded Letter */}
       <div className="z-10 my-auto flex flex-col items-center justify-center w-full max-w-xs mx-auto py-4">
         {!isOpen ? (
-          /* Sealed Envelope View */
           <motion.div
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             whileHover={{ scale: 1.02 }}
             className="w-full bg-gradient-to-br from-rose-900 via-pink-900 to-purple-900 border-2 border-pink-400/40 rounded-3xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[280px] relative overflow-hidden"
           >
-            {/* Envelope Flap Triangles Visual */}
-            <div className="absolute top-0 left-0 right-0 h-28 bg-white/5 clip-path-flap border-b border-white/10 pointer-events-none" />
-
             <div className="text-center z-10 pt-3">
               <span className="text-xs text-pink-200 uppercase font-semibold tracking-wider">
                 Gửi tới
@@ -527,7 +499,7 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
               </h2>
             </div>
 
-            {/* Wax Seal Button */}
+            {/* Wax Seal Badge labeled "Mở" */}
             <motion.div
               whileTap={{ scale: 0.9 }}
               onClick={handleOpenEnvelope}
@@ -548,14 +520,12 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
             </div>
           </motion.div>
         ) : (
-          /* Unfolded Letter View */
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.6, type: 'spring' }}
             className="w-full bg-amber-50 text-slate-800 rounded-3xl p-5 shadow-2xl border-4 border-amber-200 relative text-left min-h-[300px] flex flex-col justify-between"
           >
-            {/* Decorative Top Stamp */}
             <div className="flex justify-between items-center border-b border-amber-200 pb-3 mb-2">
               <div>
                 <p className="text-[10px] font-bold text-rose-800 uppercase tracking-wider">
@@ -568,14 +538,12 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
               <span className="text-2xl">🌹</span>
             </div>
 
-            {/* Letter Text Content with Typewriter Effect */}
             <div className="text-xs sm:text-sm font-medium leading-relaxed text-slate-800 whitespace-pre-wrap font-serif my-auto py-2">
               <span className={!letterComplete ? 'typing-cursor' : ''}>
                 {letterTypedText}
               </span>
             </div>
 
-            {/* Bottom Signature */}
             <div className="pt-2 border-t border-amber-200 text-right">
               <p className="text-[11px] font-bold text-rose-900 italic">
                 — Trân trọng & Yêu thương ❤️
@@ -585,7 +553,7 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
         )}
       </div>
 
-      {/* Floating Action Button upon letter completion */}
+      {/* Button: "Xem Kỷ Niệm →" */}
       <div className="z-10 pb-4">
         {letterComplete && (
           <motion.button
@@ -596,7 +564,7 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
             onClick={onNextStage}
             className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
           >
-            <span>Tiếp Tục Kỷ Niệm 📸</span>
+            <span>Xem Kỷ Niệm 📸</span>
             <motion.span
               animate={{ x: [0, 4, 0] }}
               transition={{ repeat: Infinity, duration: 1.2 }}
@@ -611,7 +579,9 @@ function Stage3SealedEnvelope({ student, onNextStage }) {
 }
 
 // ─────────────────────────────────────────────
-// STAGE 4: Photo Gallery (Album Ảnh Kỷ Niệm)
+// STAGE 4: Progressive Photo Gallery & Spaced Layout
+// Clean vertical stack with generous spacing (py-10, gap-12). Progressive reveal on scroll.
+// Button: "Xem Thẻ Vinh Danh (9:16) ✨"
 // ─────────────────────────────────────────────
 function Stage4PhotoGallery({ memories, onNextStage }) {
   return (
@@ -620,13 +590,13 @@ function Stage4PhotoGallery({ memories, onNextStage }) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.6 }}
       className="absolute inset-0 z-20 flex flex-col justify-between p-5 bg-gradient-to-b from-slate-950 via-pink-950 to-purple-950 text-white overflow-y-auto no-scrollbar"
     >
       <AmbientParticles />
 
       {/* Header */}
-      <div className="z-10 text-center pt-2 mb-2">
+      <div className="z-10 text-center pt-2 mb-2 shrink-0">
         <span className="text-pink-300 text-[10px] font-bold tracking-widest uppercase bg-white/10 px-3 py-1 rounded-full border border-pink-300/30">
           📸 ALBUM KỶ NIỆM
         </span>
@@ -635,17 +605,20 @@ function Stage4PhotoGallery({ memories, onNextStage }) {
         </h2>
       </div>
 
-      {/* Polaroid Photos Grid */}
-      <div className="z-10 flex flex-col items-center gap-4 my-auto py-2 w-full max-w-xs mx-auto">
-        {memories.map((mem) => (
+      {/* Progressive Reveal Vertical Stack with py-10, gap-12 spacing */}
+      <div className="z-10 flex flex-col items-center py-10 gap-12 w-full max-w-xs mx-auto">
+        {memories.map((mem, index) => (
           <motion.div
             key={mem.id}
+            initial={{ opacity: 0, y: 30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: index * 0.2 }}
             whileHover={{ scale: 1.04, rotate: 0 }}
-            className="w-full max-w-[240px] sm:max-w-[260px] bg-white text-gray-800 p-2.5 pb-3 rounded-xl shadow-2xl relative transition-transform"
+            className="w-full max-w-[250px] sm:max-w-[270px] bg-white text-gray-800 p-3 pb-3.5 rounded-xl shadow-2xl relative transition-transform"
             style={{ transform: `rotate(${mem.rotate || '0deg'})` }}
           >
             {/* Washi Tape */}
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-16 h-4 bg-pink-200/90 border border-white/60 rounded-sm shadow-sm z-10" />
+            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-pink-200/90 border border-white/60 rounded-sm shadow-sm z-10" />
 
             {/* Sticker */}
             <div className="absolute top-1 right-1 text-xl z-10 select-none">
@@ -657,7 +630,7 @@ function Stage4PhotoGallery({ memories, onNextStage }) {
               <img
                 src={mem.url}
                 alt={mem.caption}
-                className="w-full h-36 sm:h-40 object-cover"
+                className="w-full h-38 sm:h-44 object-cover"
                 onError={e => {
                   e.currentTarget.src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80';
                 }}
@@ -665,15 +638,15 @@ function Stage4PhotoGallery({ memories, onNextStage }) {
             </div>
 
             {/* Caption */}
-            <p className="mt-2 text-center font-bold text-xs text-rose-950 font-serif">
+            <p className="mt-2.5 text-center font-bold text-xs sm:text-sm text-rose-950 font-serif">
               {mem.caption}
             </p>
           </motion.div>
         ))}
       </div>
 
-      {/* Final Action Button */}
-      <div className="z-10 pb-4 pt-2">
+      {/* Final Button: "Xem Thẻ Vinh Danh (9:16) ✨" */}
+      <div className="z-10 pb-4 pt-4 shrink-0">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.95 }}
@@ -698,7 +671,8 @@ function Stage4PhotoGallery({ memories, onNextStage }) {
 }
 
 // ─────────────────────────────────────────────
-// STAGE 5: Honor Card 9:16 View & Download
+// STAGE 5: Honor Card 9:16 View & html2canvas Download
+// Hidden by default, appears on stage 5. Strict aspect-[9/16] card.
 // ─────────────────────────────────────────────
 function Stage5HonorCard({ student, onRestart }) {
   const cardRef = useRef(null);
