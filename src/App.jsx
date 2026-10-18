@@ -101,10 +101,10 @@ const DownloadIcon = () => (
   </svg>
 );
 
-const ArrowDownIcon = () => (
+const ArrowLeftIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <polyline points="19 12 12 19 5 12" />
+    <line x1="19" y1="12" x2="5" y2="12" />
+    <polyline points="12 19 5 12 12 5" />
   </svg>
 );
 
@@ -331,6 +331,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(0);
   const [showHonorCard, setShowHonorCard] = useState(false);
   const [giftRevealed, setGiftRevealed] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     async function fetchStudent() {
@@ -361,6 +364,30 @@ export default function App() {
 
     fetchStudent();
   }, []);
+
+  // Check scroll position to reveal bottom navigation bar
+  const checkScrollBottom = useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    // If content doesn't overflow or user scrolled to bottom (within 20px threshold)
+    if (scrollHeight <= clientHeight + 10 || scrollTop + clientHeight >= scrollHeight - 25) {
+      setIsAtBottom(true);
+    } else {
+      setIsAtBottom(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Reset scroll & recheck bottom state on tab change
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+    // Delay slightly to let content render and compute scrollHeight
+    const timer = setTimeout(() => {
+      checkScrollBottom();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [activeTab, checkScrollBottom]);
 
   const handleOpenHonorCard = useCallback(() => {
     confetti({
@@ -405,29 +432,12 @@ export default function App() {
           <div key="main-app" className="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-5">
             <FloatingStickers />
 
-            {/* Top Sub-Tab Navigation Indicators */}
-            <div className="relative z-10 flex items-center justify-between gap-1.5 p-1.5 bg-black/30 backdrop-blur-md rounded-2xl border border-white/10 shrink-0">
-              {TABS.map((tab, idx) => {
-                const isActive = activeTab === idx;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(idx)}
-                    className={`flex-1 py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                      isActive
-                        ? 'bg-gradient-to-r from-pink-600 to-rose-500 text-white shadow-md'
-                        : 'text-rose-200/70 hover:text-white'
-                    }`}
-                  >
-                    <span>{tab.icon}</span>
-                    <span className="truncate">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
             {/* Sub-Tab Content View */}
-            <div className="flex-1 overflow-y-auto my-3 relative z-10 flex flex-col">
+            <div
+              ref={scrollRef}
+              onScroll={checkScrollBottom}
+              className="flex-1 overflow-y-auto relative z-10 flex flex-col pr-1 scroll-smooth"
+            >
               <AnimatePresence mode="wait">
                 {activeTab === 0 && (
                   <motion.div
@@ -436,7 +446,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col gap-4 my-auto py-2"
+                    className="flex flex-col gap-4 py-2 my-auto"
                   >
                     {/* Student Profile Card */}
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl flex flex-col items-center text-center gap-3 shadow-xl">
@@ -523,7 +533,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col gap-4 my-auto py-2"
+                    className="flex flex-col gap-4 py-2 my-auto"
                   >
                     <div className="flex items-center justify-between border-b border-pink-400/20 pb-2">
                       <span className="text-pink-300 text-xs tracking-widest uppercase font-bold flex items-center gap-1.5">
@@ -575,7 +585,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col gap-4 my-auto py-2"
+                    className="flex flex-col gap-4 py-2 my-auto"
                   >
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 text-center flex flex-col items-center gap-4 shadow-lg relative overflow-hidden">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1">
@@ -622,44 +632,88 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            {/* Bottom Navigation Arrow or Honor Card Action Button */}
-            <div className="relative z-10 shrink-0 pt-1 pb-1">
-              {!isLastTab ? (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveTab(prev => Math.min(prev + 1, TABS.length - 1))}
-                  className="w-full py-3.5 px-4 rounded-2xl font-bold text-xs text-white bg-white/15 hover:bg-white/20 border border-white/20 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
+            {/* Bottom Navigation Bar (Hidden until scrolled to bottom) */}
+            <AnimatePresence>
+              {isAtBottom && (
+                <motion.div
+                  key="bottom-nav-bar"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative z-10 shrink-0 pt-2 flex flex-col gap-2"
                 >
-                  <span>Xem tiếp</span>
-                  <motion.span
-                    animate={{ y: [0, 4, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                  >
-                    <ArrowDownIcon />
-                  </motion.span>
-                </motion.button>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleOpenHonorCard}
-                  className="w-full py-4 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all border border-pink-300/40"
-                  style={{
-                    background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
-                    boxShadow: '0 4px 20px rgba(236, 72, 153, 0.5)',
-                  }}
-                >
-                  <span>Nhận Thẻ Vinh Danh ✨</span>
-                  <motion.span
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                  >
-                    <ArrowRightIcon />
-                  </motion.span>
-                </motion.button>
+                  {/* Action Button on Final Tab */}
+                  {isLastTab && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleOpenHonorCard}
+                      className="w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all border border-pink-300/40"
+                      style={{
+                        background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
+                        boxShadow: '0 4px 20px rgba(236, 72, 153, 0.5)',
+                      }}
+                    >
+                      <span>Nhận Thẻ Vinh Danh (9:16) ✨</span>
+                      <motion.span
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                      >
+                        <ArrowRightIcon />
+                      </motion.span>
+                    </motion.button>
+                  )}
+
+                  {/* Navigation Bar: Arrows + Pagination Dots */}
+                  <div className="flex items-center justify-between bg-black/40 backdrop-blur-md border border-white/15 p-2.5 rounded-2xl shadow-lg">
+                    {/* Left Arrow Button */}
+                    <button
+                      onClick={() => setActiveTab(prev => Math.max(prev - 1, 0))}
+                      disabled={activeTab === 0}
+                      className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${
+                        activeTab === 0
+                          ? 'opacity-30 cursor-not-allowed text-gray-400'
+                          : 'bg-white/10 hover:bg-white/20 text-white'
+                      }`}
+                      aria-label="Tab trước"
+                    >
+                      <ArrowLeftIcon />
+                    </button>
+
+                    {/* Pagination Dots */}
+                    <div className="flex items-center gap-2">
+                      {TABS.map((tab, idx) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(idx)}
+                          className={`transition-all rounded-full cursor-pointer ${
+                            activeTab === idx
+                              ? 'w-6 h-2.5 bg-gradient-to-r from-pink-400 to-rose-400 shadow-sm'
+                              : 'w-2.5 h-2.5 bg-white/30 hover:bg-white/50'
+                          }`}
+                          aria-label={`Chuyển sang ${tab.label}`}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Right Arrow Button */}
+                    <button
+                      onClick={() => setActiveTab(prev => Math.min(prev + 1, TABS.length - 1))}
+                      disabled={isLastTab}
+                      className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${
+                        isLastTab
+                          ? 'opacity-30 cursor-not-allowed text-gray-400'
+                          : 'bg-white/10 hover:bg-white/20 text-white'
+                      }`}
+                      aria-label="Tab tiếp"
+                    >
+                      <ArrowRightIcon />
+                    </button>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
 
           </div>
         )}
