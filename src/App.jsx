@@ -33,49 +33,51 @@ const FALLBACK = {
       caption: 'Kỷ niệm chuyến dã ngoại lớp 📸',
       url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80',
       sticker: '🏕️',
-      rotate: '-2deg'
+      rotate: '-2.5deg'
     },
     {
       id: 2,
       caption: 'Lễ tổng kết rạng rỡ ✨',
       url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=500&auto=format&fit=crop&q=80',
       sticker: '🎓',
-      rotate: '3deg'
+      rotate: '2.5deg'
     }
   ],
   gift: '🌹 Hoa hồng tươi & Thẻ quà tặng đặc biệt 🎁'
 };
 
 // ─────────────────────────────────────────────
-// Floating petals background
+// Floating Background Stickers & Sparkles
 // ─────────────────────────────────────────────
-const PETALS = ['🌸', '🌺', '🌷', '✨', '💕', '🌹'];
+const BACKGROUND_STICKERS = ['✨', '🌸', '💖', '🎀', '🌺', '🌷', '💕', '🌹', '✨', '🌸', '💖', '🎀'];
 
-function FloatingPetals() {
-  const items = Array.from({ length: 12 }, (_, i) => ({
-    id: i,
-    emoji: PETALS[i % PETALS.length],
-    left: `${5 + (i * 8) % 90}%`,
-    delay: `${(i * 0.7) % 6}s`,
-    duration: `${6 + (i * 1.2) % 6}s`,
-    size: `${0.8 + (i * 0.15) % 0.8}rem`,
-  }));
+function FloatingStickers() {
+  const items = useRef(
+    Array.from({ length: 15 }, (_, i) => ({
+      id: i,
+      emoji: BACKGROUND_STICKERS[i % BACKGROUND_STICKERS.length],
+      left: `${(i * 7 + 3) % 92}%`,
+      delay: `${(i * 0.6) % 5}s`,
+      duration: `${6.5 + (i * 1.1) % 5.5}s`,
+      size: `${0.85 + (i * 0.12) % 0.8}rem`,
+    }))
+  ).current;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {items.map(p => (
+      {items.map(s => (
         <span
-          key={p.id}
+          key={s.id}
           className="petal"
           style={{
-            left: p.left,
+            left: s.left,
             bottom: '-10%',
-            animationDelay: p.delay,
-            animationDuration: p.duration,
-            fontSize: p.size,
+            animationDelay: s.delay,
+            animationDuration: s.duration,
+            fontSize: s.size,
           }}
         >
-          {p.emoji}
+          {s.emoji}
         </span>
       ))}
     </div>
@@ -100,7 +102,7 @@ const DownloadIcon = () => (
 );
 
 const ArrowRightIcon = () => (
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="5" y1="12" x2="19" y2="12" />
     <polyline points="12 5 19 12 12 19" />
   </svg>
@@ -112,6 +114,14 @@ const BackIcon = () => (
     <polyline points="12 19 5 12 12 5" />
   </svg>
 );
+
+// Framer Motion Scroll-Reveal Variant Configuration
+const scrollReveal = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '-40px' },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+};
 
 // ─────────────────────────────────────────────
 // Fullscreen Envelope Cover Screen
@@ -137,7 +147,7 @@ function EnvelopeScreen({ student, onOpen }) {
       transition={{ exit: { duration: 0.5, ease: 'easeInOut' } }}
       className="inset-0 absolute z-50 flex flex-col justify-between p-6 bg-gradient-to-b from-rose-950 via-pink-900 to-purple-950"
     >
-      <FloatingPetals />
+      <FloatingStickers />
 
       {/* Header */}
       <div className="relative z-10 text-center pt-2">
@@ -244,7 +254,7 @@ function HonorCardView({ student, onBack }) {
 
       const link = document.createElement('a');
       link.href = canvas.toDataURL('image/png');
-      link.download = `Thẻ-Vinh-Danh-20-10-${(student.name || 'Hoa').replace(/\s+/g, '-')}.png`;
+      link.download = `The-Vinh-Danh-20-10-${(student.name || 'Hoa').replace(/\s+/g, '-')}.png`;
       link.click();
       setDone(true);
       setTimeout(() => setDone(false), 3000);
@@ -278,7 +288,7 @@ function HonorCardView({ student, onBack }) {
         </span>
       </div>
 
-      {/* 9:16 Aspect Ratio Honor Card strictly per design specs */}
+      {/* 9:16 Aspect Ratio Honor Card */}
       <div
         ref={cardRef}
         className="w-full aspect-[9/16] max-h-[65vh] rounded-3xl p-5 bg-gradient-to-br from-pink-600 via-rose-500 to-purple-700 shadow-2xl flex flex-col justify-between relative overflow-hidden text-center mx-auto"
@@ -434,10 +444,10 @@ export default function App() {
 
   const handleOpenHonorCard = useCallback(() => {
     confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#ec4899', '#f9a8d4', '#fbbf24', '#fff'],
+      particleCount: 110,
+      spread: 75,
+      origin: { y: 0.65 },
+      colors: ['#ec4899', '#f9a8d4', '#fbbf24', '#ffffff', '#f43f5e'],
     });
     setShowHonorCard(true);
   }, []);
@@ -445,10 +455,10 @@ export default function App() {
   const handleRevealGift = useCallback(() => {
     setGiftRevealed(true);
     confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#ec4899', '#f9a8d4', '#fbbf24', '#fff'],
+      particleCount: 90,
+      spread: 80,
+      origin: { y: 0.65 },
+      colors: ['#ec4899', '#f9a8d4', '#fbbf24', '#ffffff', '#f43f5e'],
     });
   }, []);
 
@@ -469,7 +479,7 @@ export default function App() {
           />
         ) : showHonorCard ? (
           <div key="honor-card-wrapper" className="absolute inset-0 z-10 flex flex-col justify-between">
-            <FloatingPetals />
+            <FloatingStickers />
             <HonorCardView
               student={student}
               onBack={() => setShowHonorCard(false)}
@@ -477,25 +487,35 @@ export default function App() {
           </div>
         ) : (
           <div key="main-app" className="absolute inset-0 z-10 flex flex-col justify-between">
-            <FloatingPetals />
+            <FloatingStickers />
 
             {/* Single Continuous Vertical Landing Page */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 scroll-smooth flex flex-col gap-6 relative z-10">
 
-              {/* SECTION 1: Intro / Cover Header */}
-              <section className="text-center pt-2 flex flex-col items-center gap-2">
-                <span className="text-amber-300 text-[10px] uppercase tracking-[0.25em] font-extrabold bg-white/10 px-3 py-1 rounded-full border border-amber-300/30">
+              {/* SECTION 1: Intro Header (Scroll-Reveal) */}
+              <motion.section
+                {...scrollReveal}
+                className="text-center pt-2 flex flex-col items-center gap-2"
+              >
+                <span className="text-amber-300 text-[10px] uppercase tracking-[0.25em] font-extrabold bg-white/10 px-3 py-1 rounded-full border border-amber-300/30 shadow-sm">
                   ✦ YEARBOOK 20/10 ✦
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-black text-white mt-1 leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
                   Sổ Kỷ Niệm 20/10
                 </h1>
                 <p className="text-rose-200/80 text-xs font-medium">Tỏa sáng & rực rỡ như những đóa hoa 🌸</p>
-              </section>
+              </motion.section>
 
-              {/* SECTION 2: Profile, Vibe & Emoji Stickers */}
-              <section className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl flex flex-col items-center text-center gap-3 shadow-xl relative overflow-hidden">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-pink-400 shadow-md mx-auto overflow-hidden shrink-0 relative">
+              {/* SECTION 2: Profile, Vibe & Emoji Stickers (Scroll-Reveal) */}
+              <motion.section
+                {...scrollReveal}
+                className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl flex flex-col items-center text-center gap-3 shadow-xl relative overflow-hidden"
+              >
+                <motion.div
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-pink-400 shadow-md mx-auto overflow-hidden shrink-0 relative avatar-glow"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                >
                   <img
                     src={student?.avatar_url || FALLBACK.avatar_url}
                     alt={student?.name || 'Avatar'}
@@ -504,7 +524,7 @@ export default function App() {
                       e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student?.name || 'Hoa')}&background=be185d&color=fff&size=256`;
                     }}
                   />
-                </div>
+                </motion.div>
 
                 <div className="flex flex-col items-center gap-1">
                   <span className="bg-gradient-to-r from-amber-300 to-pink-300 bg-clip-text text-transparent text-xs font-bold uppercase tracking-wider">
@@ -524,38 +544,56 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Emoji Stickers */}
+                {/* Floating/Interactive Emoji Stickers */}
                 <div className="flex items-center justify-center gap-2 pt-1">
                   {stickerList.map((stk, idx) => (
-                    <span key={idx} className="text-xl hover:scale-125 transition-transform duration-200 cursor-default filter drop-shadow">
+                    <motion.span
+                      key={idx}
+                      whileHover={{ scale: 1.3, rotate: 12 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-xl cursor-default filter drop-shadow select-none"
+                    >
                       {stk}
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
-              {/* SECTION 3: Memories / Photo Gallery */}
-              <section className="flex flex-col gap-3">
+              {/* SECTION 3: Polaroid Photo Gallery (Scroll-Reveal) */}
+              <motion.section
+                {...scrollReveal}
+                className="flex flex-col gap-3"
+              >
                 <div className="flex items-center justify-between border-b border-pink-400/20 pb-1.5">
-                  <span className="text-pink-300 text-xs tracking-widest uppercase font-bold">
+                  <span className="text-pink-300 text-xs tracking-widest uppercase font-bold flex items-center gap-1.5">
                     📸 Góc Kỷ Niệm
                   </span>
-                  <span className="text-[10px] text-rose-200/80 bg-white/10 px-2 py-0.5 rounded-full font-semibold">CLASS GALLERY</span>
+                  <span className="text-[10px] text-rose-200/80 bg-white/10 px-2 py-0.5 rounded-full font-semibold">POLAROID GALLERY</span>
                 </div>
 
-                <div className="flex flex-col gap-4 items-center">
+                <div className="flex flex-col gap-5 items-center">
                   {memoriesList.map((mem) => (
                     <motion.div
                       key={mem.id}
-                      whileHover={{ scale: 1.02 }}
-                      className="w-full max-w-xs bg-white text-gray-800 p-3 pb-4 rounded-xl shadow-2xl relative transition-transform duration-200"
+                      initial={{ opacity: 0, y: 25 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5 }}
+                      whileHover={{ scale: 1.04, rotate: 0 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full max-w-xs bg-white text-gray-800 p-3 pb-5 rounded-sm shadow-2xl relative transition-shadow duration-300"
                       style={{ transform: `rotate(${mem.rotate || '0deg'})` }}
                     >
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-pink-200/70 border border-white/80 rounded-sm shadow-sm opacity-90 backdrop-blur-sm z-10" />
+                      {/* Washi Tape Effect */}
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-pink-200/80 border border-white/60 rounded-sm shadow-sm z-10 backdrop-blur-xs" />
+
+                      {/* Polaroid Sticker Badge */}
                       <div className="absolute top-2 right-2 text-2xl z-10 filter drop-shadow">
                         {mem.sticker || '✨'}
                       </div>
-                      <div className="aspect-[4/3] w-full bg-gray-100 rounded-lg overflow-hidden shadow-inner">
+
+                      {/* Photo Box */}
+                      <div className="aspect-[4/3] w-full bg-gray-100 rounded-xs overflow-hidden shadow-inner">
                         <img
                           src={mem.url}
                           alt={mem.caption}
@@ -565,16 +603,21 @@ export default function App() {
                           }}
                         />
                       </div>
-                      <p className="mt-3 text-center font-bold text-xs text-rose-900 tracking-wide font-serif">
+
+                      {/* Polaroid Caption */}
+                      <p className="mt-3 text-center font-bold text-xs text-rose-950 tracking-wide font-serif">
                         {mem.caption}
                       </p>
                     </motion.div>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
-              {/* SECTION 4: Wishes from Classmates */}
-              <section className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl flex flex-col gap-3 shadow-lg">
+              {/* SECTION 4: Wishes from Classmates (Scroll-Reveal) */}
+              <motion.section
+                {...scrollReveal}
+                className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl flex flex-col gap-3 shadow-lg"
+              >
                 <div className="flex items-center justify-between border-b border-pink-400/20 pb-2">
                   <span className="text-pink-300 text-xs tracking-widest uppercase font-bold flex items-center gap-1.5">
                     <WishIcon /> Lời Chúc Từ Bạn Học 💌
@@ -584,7 +627,11 @@ export default function App() {
 
                 <div className="flex flex-col gap-3">
                   {wishesList.map((w, idx) => (
-                    <div key={idx} className="bg-black/20 rounded-2xl p-3.5 flex flex-col gap-2 border border-white/10">
+                    <motion.div
+                      key={idx}
+                      whileHover={{ scale: 1.01 }}
+                      className="bg-black/20 rounded-2xl p-3.5 flex flex-col gap-2 border border-white/10 shadow-sm"
+                    >
                       <div className="flex items-center gap-2.5">
                         <img
                           src={w.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(w.from || 'Nam Sinh')}&background=0284c7&color=fff`}
@@ -596,46 +643,75 @@ export default function App() {
                       <p className="text-rose-100/90 text-xs leading-relaxed italic">
                         “{w.text}”
                       </p>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
-              {/* SECTION 5: Practical Gift */}
-              <section className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 text-center flex flex-col items-center gap-3 shadow-lg">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">Món Quà Bí Mật 🎁</h4>
+              {/* SECTION 5: Interactive Secret Gift Box (Scroll-Reveal) */}
+              <motion.section
+                {...scrollReveal}
+                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 text-center flex flex-col items-center gap-3 shadow-lg relative overflow-hidden"
+              >
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1">
+                  🎁 Món Quà Bí Mật
+                </h4>
+
                 <AnimatePresence mode="wait">
                   {!giftRevealed ? (
                     <motion.button
                       key="box"
+                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.93 }}
                       onClick={handleRevealGift}
-                      className="py-3 px-6 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl font-bold text-xs text-white shadow-lg cursor-pointer flex items-center gap-2"
+                      className="py-3.5 px-6 bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 rounded-2xl font-bold text-xs text-white shadow-xl cursor-pointer flex items-center gap-2.5 border border-pink-300/30"
+                      animate={{
+                        scale: [1, 1.03, 1],
+                      }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 2,
+                        ease: "easeInOut"
+                      }}
                     >
-                      <span>🎀 Nhấn để nhận món quà</span>
+                      <motion.span
+                        animate={{ rotate: [-8, 8, -8] }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                        className="text-xl"
+                      >
+                        🎁
+                      </motion.span>
+                      <span>Nhấn để mở quà bí mật 🎀</span>
                     </motion.button>
                   ) : (
                     <motion.div
                       key="revealed"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="text-pink-100 text-xs font-bold leading-relaxed bg-pink-900/60 p-3.5 rounded-xl border border-pink-400/30 w-full"
+                      initial={{ scale: 0.6, opacity: 0, rotate: -5 }}
+                      animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      className="text-pink-100 text-xs font-bold leading-relaxed bg-pink-900/80 p-4 rounded-2xl border border-pink-400/40 w-full shadow-inner flex flex-col items-center gap-1.5"
                     >
-                      {student?.gift || FALLBACK.gift}
+                      <span className="text-2xl animate-bounce">🌹</span>
+                      <p className="text-amber-200 text-xs font-extrabold uppercase tracking-wide">Món Quà Dành Tặng Bạn</p>
+                      <p className="text-white text-sm mt-0.5">{student?.gift || FALLBACK.gift}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </section>
+              </motion.section>
 
-              {/* Bottom Prominent CTA Button */}
-              <div className="pt-2 pb-4">
+              {/* Bottom Prominent Glowing CTA Button (Scroll-Reveal) */}
+              <motion.div
+                {...scrollReveal}
+                className="pt-2 pb-6"
+              >
                 <motion.button
+                  whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={handleOpenHonorCard}
-                  className="w-full py-4 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all"
+                  className="w-full py-4 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all border border-pink-300/40"
                   style={{
-                    background: 'linear-gradient(135deg, #ec4899, #be185d)',
-                    boxShadow: '0 4px 25px rgba(236,72,153,0.6)',
+                    background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
+                    boxShadow: '0 4px 25px rgba(236, 72, 153, 0.6)',
                   }}
                 >
                   <span>Nhận Thẻ Vinh Danh (9:16) ✨</span>
@@ -646,7 +722,7 @@ export default function App() {
                     <ArrowRightIcon />
                   </motion.span>
                 </motion.button>
-              </div>
+              </motion.div>
 
             </div>
           </div>
