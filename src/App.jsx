@@ -331,14 +331,15 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(0);
   const [showHonorCard, setShowHonorCard] = useState(false);
   const [giftRevealed, setGiftRevealed] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const scrollRef = useRef(null);
 
   const checkScroll = useCallback(() => {
     if (!scrollRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    const atBottom = (scrollHeight - clientHeight <= 10) || (scrollTop + clientHeight >= scrollHeight - 15);
+    // If content doesn't overflow or user scrolled close to bottom (within 25px)
+    const atBottom = (scrollHeight - clientHeight <= 25) || (scrollTop + clientHeight >= scrollHeight - 30);
     setIsAtBottom(atBottom);
   }, []);
 
@@ -378,7 +379,7 @@ export default function App() {
     }
     const timer = setTimeout(() => {
       checkScroll();
-    }, 50);
+    }, 60);
     return () => clearTimeout(timer);
   }, [activeTab, giftRevealed, checkScroll, loading, showHonorCard]);
 
@@ -409,7 +410,7 @@ export default function App() {
   const isLastTab = activeTab === TABS.length - 1;
 
   return (
-    <div className="w-full max-w-sm sm:max-w-md h-dvh mx-auto relative overflow-hidden bg-gradient-to-b from-rose-950 via-pink-900 to-purple-950 text-white font-sans flex flex-col justify-between">
+    <div className="w-full max-w-sm sm:max-w-md h-dvh mx-auto relative overflow-hidden bg-gradient-to-b from-rose-950 via-pink-900 to-purple-950 text-white font-sans flex flex-col justify-between p-4 sm:p-5">
       <AnimatePresence mode="wait">
         {loading ? (
           <LoadingScreen key="loading" />
@@ -526,7 +527,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col gap-4 py-2"
+                    className="flex flex-col gap-3 py-2"
                   >
                     <div className="flex items-center justify-between border-b border-pink-400/20 pb-2">
                       <span className="text-pink-300 text-xs tracking-widest uppercase font-bold flex items-center gap-1.5">
@@ -534,27 +535,27 @@ export default function App() {
                       </span>
                     </div>
 
-                    <div className="flex flex-col gap-4 items-center w-full">
+                    <div className="flex flex-col gap-3.5 items-center w-full max-h-[65vh] overflow-y-auto pr-1">
                       {memoriesList.map((mem) => (
                         <div
                           key={mem.id}
-                          className="w-full max-w-[85%] sm:max-w-[320px] mx-auto bg-white text-gray-800 p-2.5 pb-3 rounded-md shadow-xl relative transition-transform"
+                          className="w-full max-w-[260px] sm:max-w-[280px] mx-auto bg-white text-gray-800 p-2 pb-2.5 rounded-md shadow-xl relative transition-transform"
                           style={{ transform: `rotate(${mem.rotate || '0deg'})` }}
                         >
                           {/* Washi Tape */}
-                          <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-pink-200/80 border border-white/60 rounded-sm shadow-sm z-10" />
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-3.5 bg-pink-200/80 border border-white/60 rounded-sm shadow-sm z-10" />
 
                           {/* Sticker */}
-                          <div className="absolute top-1.5 right-1.5 text-xl z-10 select-none">
+                          <div className="absolute top-1 right-1 text-lg z-10 select-none">
                             {mem.sticker || '✨'}
                           </div>
 
-                          {/* Photo Box */}
-                          <div className="w-full aspect-[4/3] bg-gray-100 rounded-xs overflow-hidden shadow-inner">
+                          {/* Photo Box with controlled height */}
+                          <div className="w-full bg-gray-100 rounded-xs overflow-hidden shadow-inner">
                             <img
                               src={mem.url}
                               alt={mem.caption}
-                              className="w-full aspect-[4/3] object-cover"
+                              className="w-full max-h-[180px] object-cover"
                               onError={e => {
                                 e.currentTarget.src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80';
                               }}
@@ -562,7 +563,7 @@ export default function App() {
                           </div>
 
                           {/* Caption */}
-                          <p className="mt-2 text-center font-bold text-[11px] sm:text-xs text-rose-950 tracking-wide font-serif">
+                          <p className="mt-1.5 text-center font-bold text-[11px] text-rose-950 tracking-wide font-serif">
                             {mem.caption}
                           </p>
                         </div>
@@ -645,9 +646,9 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            {/* Bottom Navigation Bar - Hidden during scrolling, appears at absolute bottom */}
+            {/* Bottom Navigation Bar - Fixed at bottom, visible when reaching bottom of screen */}
             <div
-              className={`absolute bottom-4 left-4 right-4 z-20 transition-all duration-300 ${
+              className={`absolute bottom-4 left-4 right-4 z-30 transition-all duration-300 ${
                 isAtBottom ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
               }`}
             >
