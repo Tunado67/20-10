@@ -220,7 +220,10 @@ function Stage1EnchantedRose({ onRoseTap }) {
 // 3) Auto-transitions to Stage 3 immediately after flower bouquet finishes blooming.
 // ─────────────────────────────────────────────
 function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
-  const messages = skyMessages && skyMessages.length > 0 ? skyMessages : FALLBACK.sky_messages;
+  const messages = useMemo(() => {
+    const raw = skyMessages && skyMessages.length > 0 ? skyMessages : FALLBACK.sky_messages;
+    return raw.map(m => (typeof m === "string" ? m.normalize("NFC") : m));
+  }, [skyMessages]);
   const [currentPage, setCurrentPage] = useState(0);
   const [messagesFinished, setMessagesFinished] = useState(false);
   const [flowerStage, setFlowerStage] = useState(0);
@@ -442,7 +445,8 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
-  const wishText = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
+  const rawWishText = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
+  const wishText = useMemo(() => (typeof rawWishText === "string" ? rawWishText.normalize("NFC") : rawWishText), [rawWishText]);
   const [displayedText, setDisplayedText] = useState("");
   const [typingComplete, setTypingComplete] = useState(false);
 
@@ -578,9 +582,12 @@ function Stage3GreetingCard({ student, onNextStage }) {
               </span>
             </div>
 
-            {/* Personalized Typewriter Text */}
+            {/* Personalized Typewriter Text with full Vietnamese serif support */}
             <div className="my-auto py-2">
-              <p className="text-sm sm:text-base font-semibold leading-relaxed text-slate-800 italic font-serif min-h-[80px]">
+              <p
+                className="text-sm sm:text-base font-semibold leading-relaxed text-slate-800 italic min-h-[80px]"
+                style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
+              >
                 {displayedText}
                 {!typingComplete && <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>}
               </p>
