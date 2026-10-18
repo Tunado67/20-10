@@ -20,43 +20,13 @@ const FALLBACK = {
     'Gửi tới bạn những tia nắng ấm áp nhất và ngàn nụ cười rạng rỡ ✨',
     'Cảm ơn vì sự hiện diện đáng yêu của bạn luôn mang lại niềm vui cho mọi người 🌹'
   ],
-  letter_content: `Thân gửi bạn,\n\nNhân ngày Phụ nữ Việt Nam 20/10, chúc bạn luôn tràn đầy năng lượng tích cực, luôn yêu thương bản thân và gặt hái thật nhiều thành công.\n\nHãy luôn giữ trọn nụ cười rạng rỡ và tỏa sáng theo cách riêng của bạn nhé! ✨🌸`,
   wishes: [
     {
-      from: 'Tập thể Nam Sinh Lớp 12A',
+      from: 'Tập thể Lớp 12A',
       avatar: 'https://ui-avatars.com/api/?name=Nam+Sinh&background=0284c7&color=fff',
-      text: 'Chúc bạn ngày 20/10 tràn ngập nụ cười và quà tặng! Cảm ơn bạn đã luôn đồng hành và mang năng lượng tích cực đến cho cả lớp ❤️'
-    },
-    {
-      from: 'Tuấn Anh (Bí Thư)',
-      avatar: 'https://ui-avatars.com/api/?name=Tuan+Anh&background=4f46e5&color=fff',
-      text: 'Chúc bạn ngày 20/10 luôn xinh đẹp, học giỏi và vạn sự như ý! Mong bạn luôn rạng rỡ như đóa hoa hướng dương 🌻'
+      text: 'Chúc bạn ngày 20/10 luôn xinh đẹp, tràn ngập nụ cười và học tốt!'
     }
-  ],
-  memories: [
-    {
-      id: 1,
-      caption: 'Kỷ niệm chuyến dã ngoại 📸',
-      url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80',
-      sticker: '🏕️',
-      rotate: '-2deg'
-    },
-    {
-      id: 2,
-      caption: 'Lễ tổng kết rạng rỡ ✨',
-      url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=500&auto=format&fit=crop&q=80',
-      sticker: '🎓',
-      rotate: '2deg'
-    },
-    {
-      id: 3,
-      caption: 'Khoảnh khắc rạng ngời 🌸',
-      url: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&auto=format&fit=crop&q=80',
-      sticker: '✨',
-      rotate: '-1deg'
-    }
-  ],
-  gift: '🌹 Hoa hồng tươi & Thẻ quà tặng đặc biệt 🎁'
+  ]
 };
 
 // ─────────────────────────────────────────────
@@ -98,8 +68,9 @@ function AmbientParticles() {
 }
 
 // ─────────────────────────────────────────────
-// STAGE 1: Enchanted Glass Rose (100vh)
-// Gentle 1.5s fade-in animation, glowing prompt, tap to flash transition
+// STAGE 1: Enchanted Glass Rose (Slow Fade-In duration-2000)
+// Starts with completely dark screen, glass rose and container fade in slowly (2000ms).
+// Prompt text: "Nhấn nhẹ để mở ✨". Tap triggers bright bloom flash.
 // ─────────────────────────────────────────────
 function Stage1EnchantedRose({ onRoseTap }) {
   const [flashing, setFlashing] = useState(false);
@@ -118,14 +89,14 @@ function Stage1EnchantedRose({ onRoseTap }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ duration: 1.5, ease: 'easeOut' }} // Gentle slow duration-1500 fade in
-      className="absolute inset-0 z-20 flex flex-col items-center justify-between py-12 px-6 bg-slate-950 text-white select-none overflow-hidden"
+      transition={{ duration: 2.0, ease: 'easeInOut' }}
+      className="absolute inset-0 z-20 flex flex-col items-center justify-between py-12 px-6 bg-slate-950 text-white select-none overflow-hidden duration-2000"
     >
-      {/* Flash Effect Overlay on Tap */}
+      {/* Bloom Flash Effect Overlay on Tap */}
       {flashing && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 0.8] }}
+          animate={{ opacity: [0, 1, 0.9] }}
           transition={{ duration: 0.6 }}
           className="absolute inset-0 bg-white z-50 pointer-events-none"
         />
@@ -155,7 +126,7 @@ function Stage1EnchantedRose({ onRoseTap }) {
         <motion.span
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4, duration: 1 }}
+          transition={{ delay: 0.6, duration: 1.2 }}
           className="text-amber-300 text-[11px] font-bold tracking-[0.2em] uppercase px-3 py-1 rounded-full bg-white/5 border border-amber-300/20 backdrop-blur-md"
         >
           ✨ BẢO TÀNG HOA HỒNG BẤT TỬ ✨
@@ -163,7 +134,7 @@ function Stage1EnchantedRose({ onRoseTap }) {
         <motion.h1
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.7, duration: 1 }}
+          transition={{ delay: 0.9, duration: 1.2 }}
           className="text-xl sm:text-2xl font-black mt-3 bg-gradient-to-r from-pink-200 via-rose-300 to-amber-200 bg-clip-text text-transparent drop-shadow-lg"
         >
           Lồng Kính Diệu Kỳ
@@ -241,41 +212,47 @@ function Stage1EnchantedRose({ onRoseTap }) {
 }
 
 // ─────────────────────────────────────────────
-// STAGE 2: Sky Messages & Slower Blooming Bouquet
-// Sequential messages fade in, stay briefly, and fade out COMPLETELY before next message.
-// Slow gentle bouquet bloom.
+// STAGE 2: Mini Flip Card & Large Centered Bouquet
+// 1) Mini Card Page-Flipping Messages: Tapping card flips smoothly to next message chunk.
+// 2) Large Centered Bouquet: After flipping through all message pages and clicking continue,
+//    display a large bouquet of flowers positioned right in the center of the screen, blooming slowly and gracefully.
+// 3) Bottom button: "Mở Thẻ Vinh Danh ✈️ →"
 // ─────────────────────────────────────────────
-function Stage2SoothingSky({ skyMessages, onNextStage }) {
-  const [displayedIndex, setDisplayedIndex] = useState(0);
-  const [messagesDone, setMessagesDone] = useState(false);
+function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
+  const messages = skyMessages && skyMessages.length > 0 ? skyMessages : FALLBACK.sky_messages;
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [messagesFinished, setMessagesFinished] = useState(false);
   const [flowerStage, setFlowerStage] = useState(0);
 
-  // Sequential message timer: Each message fades in, displays for 2.5s, then advances
+  const handleCardFlip = () => {
+    if (isFlipping || messagesFinished) return;
+    setIsFlipping(true);
+
+    if (currentPage < messages.length - 1) {
+      setTimeout(() => {
+        setCurrentPage(prev => prev + 1);
+        setIsFlipping(false);
+      }, 300);
+    } else {
+      setTimeout(() => {
+        setMessagesFinished(true);
+        setIsFlipping(false);
+      }, 300);
+    }
+  };
+
+  // Slower, graceful blooming bouquet sequence when messages finished
   useEffect(() => {
-    if (messagesDone) return;
-
-    const timer = setTimeout(() => {
-      if (displayedIndex < skyMessages.length - 1) {
-        setDisplayedIndex(prev => prev + 1);
-      } else {
-        setMessagesDone(true);
-      }
-    }, 3200);
-
-    return () => clearTimeout(timer);
-  }, [displayedIndex, skyMessages.length, messagesDone]);
-
-  // Slower, gentle bouquet bloom timing
-  useEffect(() => {
-    if (!messagesDone) return;
+    if (!messagesFinished) return;
     const timers = [];
-    timers.push(setTimeout(() => setFlowerStage(1), 800));
-    timers.push(setTimeout(() => setFlowerStage(2), 2000));
-    timers.push(setTimeout(() => setFlowerStage(3), 3200));
-    timers.push(setTimeout(() => setFlowerStage(4), 4400));
+    timers.push(setTimeout(() => setFlowerStage(1), 600));
+    timers.push(setTimeout(() => setFlowerStage(2), 1600));
+    timers.push(setTimeout(() => setFlowerStage(3), 2600));
+    timers.push(setTimeout(() => setFlowerStage(4), 3800));
 
     return () => timers.forEach(t => clearTimeout(t));
-  }, [messagesDone]);
+  }, [messagesFinished]);
 
   return (
     <motion.div
@@ -291,57 +268,99 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
       {/* Header */}
       <div className="z-10 text-center pt-2">
         <span className="text-pink-300 text-[10px] font-bold tracking-widest uppercase bg-white/10 px-3 py-1 rounded-full border border-pink-300/30">
-          🌌 BẦU TRỜI THÔNG ĐIỆP
+          {messagesFinished ? '💐 ĐÓA HOA TỎA SÁNG' : '📖 LẬT THẺ THÔNG ĐIỆP'}
         </span>
       </div>
 
-      {/* Sequential Messages: Each message fades in and fades out completely */}
-      <div className="z-10 my-auto flex flex-col items-center justify-center min-h-[160px] w-full max-w-xs mx-auto text-center">
-        <AnimatePresence mode="wait">
-          {!messagesDone && (
+      {/* Center Section: Mini Flip Card OR Large Centered Bouquet */}
+      <div className="z-10 my-auto flex flex-col items-center justify-center w-full max-w-xs mx-auto">
+        {!messagesFinished ? (
+          <div className="flex flex-col items-center w-full gap-4">
+            {/* Interactive Mini Flip Card */}
             <motion.div
-              key={`msg-${displayedIndex}`}
-              initial={{ opacity: 0, y: 15, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -15, scale: 0.95 }}
-              transition={{ duration: 0.8, ease: 'easeInOut' }}
-              className="p-5 bg-gradient-to-r from-rose-900/80 to-purple-900/80 backdrop-blur-lg rounded-2xl border border-pink-400/30 text-sm sm:text-base text-pink-100 font-medium shadow-2xl w-full text-glow leading-relaxed"
+              onClick={handleCardFlip}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
+              animate={{ rotateY: isFlipping ? 90 : 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="w-full min-h-[190px] bg-gradient-to-br from-rose-900/90 via-purple-900/90 to-slate-900/90 backdrop-blur-xl border-2 border-pink-400/40 rounded-2xl p-6 shadow-2xl cursor-pointer flex flex-col justify-between relative overflow-hidden select-none text-center"
             >
-              {skyMessages[displayedIndex]}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              {/* Decorative Corner Stars */}
+              <div className="absolute top-2 left-3 text-amber-300 text-xs">✨</div>
+              <div className="absolute top-2 right-3 text-pink-300 text-xs">🌸</div>
+              <div className="absolute bottom-2 right-3 text-amber-200 text-xs">✨</div>
 
-      {/* Slower Blooming Bouquet */}
-      <div className="z-10 flex flex-col items-center justify-center my-auto min-h-[180px]">
-        {messagesDone ? (
+              <div className="text-[10px] font-bold text-pink-300 tracking-wider uppercase">
+                THÔNG ĐIỆP #{currentPage + 1} / {messages.length}
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={currentPage}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-sm sm:text-base font-medium text-pink-100 leading-relaxed my-auto text-glow"
+                >
+                  "{messages[currentPage]}"
+                </motion.p>
+              </AnimatePresence>
+
+              <div className="text-[11px] text-pink-300/80 font-semibold flex items-center justify-center gap-1.5 pt-2 border-t border-pink-400/20">
+                <span>Chạm để lật sang trang tiếp</span>
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
+                >
+                  📖 →
+                </motion.span>
+              </div>
+            </motion.div>
+
+            {/* Page Dots */}
+            <div className="flex items-center gap-2">
+              {messages.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === currentPage ? 'w-6 bg-pink-400' : 'w-2 bg-pink-900/60'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* Large Centered Bouquet blooming slowly and gracefully */
           <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
+            initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.2, ease: 'easeOut' }}
-            className="flex flex-col items-center gap-2"
+            className="flex flex-col items-center gap-4 my-auto w-full py-4"
           >
-            <div className="relative w-40 h-40 flex items-center justify-center">
-              {/* Center Main Flower */}
+            <div className="relative w-52 h-52 sm:w-60 sm:h-60 flex items-center justify-center">
+              {/* Background Bouquet Glow */}
+              <div className="absolute inset-0 bg-pink-500/20 blur-3xl rounded-full -z-10" />
+
+              {/* Center Main Large Flower */}
               <motion.span
                 animate={{
-                  scale: flowerStage >= 1 ? [0, 1.25, 1] : 0,
+                  scale: flowerStage >= 1 ? [0, 1.3, 1.1] : 0,
                   rotate: flowerStage >= 1 ? 0 : -45
                 }}
                 transition={{ duration: 1.2, ease: 'easeOut' }}
-                className="text-6xl sm:text-7xl z-20 absolute filter drop-shadow-[0_0_20px_rgba(244,63,94,0.8)]"
+                className="text-7xl sm:text-8xl z-20 absolute filter drop-shadow-[0_0_25px_rgba(244,63,94,0.9)] select-none"
               >
                 🌺
               </motion.span>
 
-              {/* Side Flowers blooming sequentially with slow gentle transitions */}
+              {/* Side Flowers blooming sequentially around center bouquet */}
               {flowerStage >= 2 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: -42, y: -22, rotate: -20 }}
+                  animate={{ scale: 1, x: -55, y: -30, rotate: -22 }}
                   transition={{ duration: 1.2, ease: 'easeOut' }}
-                  className="text-4xl sm:text-5xl absolute z-10"
+                  className="text-5xl sm:text-6xl absolute z-10 select-none"
                 >
                   🌸
                 </motion.span>
@@ -349,9 +368,9 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
               {flowerStage >= 2 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: 42, y: -22, rotate: 20 }}
+                  animate={{ scale: 1, x: 55, y: -30, rotate: 22 }}
                   transition={{ duration: 1.2, ease: 'easeOut' }}
-                  className="text-4xl sm:text-5xl absolute z-10"
+                  className="text-5xl sm:text-6xl absolute z-10 select-none"
                 >
                   🌷
                 </motion.span>
@@ -359,9 +378,9 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
               {flowerStage >= 3 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: -32, y: 28, rotate: -35 }}
+                  animate={{ scale: 1, x: -45, y: 38, rotate: -35 }}
                   transition={{ duration: 1.2, ease: 'easeOut' }}
-                  className="text-3xl sm:text-4xl absolute z-10"
+                  className="text-4xl sm:text-5xl absolute z-10 select-none"
                 >
                   🌹
                 </motion.span>
@@ -369,37 +388,45 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
               {flowerStage >= 3 && (
                 <motion.span
                   initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{ scale: 1, x: 32, y: 28, rotate: 35 }}
+                  animate={{ scale: 1, x: 45, y: 38, rotate: 35 }}
                   transition={{ duration: 1.2, ease: 'easeOut' }}
-                  className="text-3xl sm:text-4xl absolute z-10"
+                  className="text-4xl sm:text-5xl absolute z-10 select-none"
                 >
                   🌻
                 </motion.span>
               )}
               {flowerStage >= 4 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ repeat: Infinity, duration: 2.5 }}
-                  className="text-2xl absolute -top-4 text-amber-300 z-30"
-                >
-                  ✨
-                </motion.span>
+                <>
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: [1, 1.4, 1] }}
+                    transition={{ repeat: Infinity, duration: 2.5 }}
+                    className="text-3xl absolute -top-6 text-amber-300 z-30"
+                  >
+                    ✨
+                  </motion.span>
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ repeat: Infinity, duration: 2.2, delay: 0.5 }}
+                    className="text-2xl absolute -bottom-4 text-pink-300 z-30"
+                  >
+                    💖
+                  </motion.span>
+                </>
               )}
             </div>
 
-            <p className="text-xs font-bold text-pink-200 tracking-wide mt-2">
+            <p className="text-xs sm:text-sm font-bold text-pink-200 tracking-wide text-center">
               {flowerStage < 4 ? 'Đóa hoa đang từ từ nở rộ… 🌸' : 'Bó hoa tươi thắm rực rỡ tỏa ngát hương! 💐'}
             </p>
           </motion.div>
-        ) : (
-          <p className="text-[11px] text-pink-300/60 italic">Đang tải những câu từ yêu thương…</p>
         )}
       </div>
 
-      {/* Button: "Mở Thiệp Chúc ✉️ →" */}
-      <div className="z-10 pb-4">
-        {flowerStage >= 4 && (
+      {/* Bottom Action Button: "Mở Thẻ Vinh Danh ✈️ →" */}
+      <div className="z-10 pb-4 h-16 flex items-end">
+        {messagesFinished && flowerStage >= 4 && (
           <motion.button
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -408,9 +435,9 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
             onClick={onNextStage}
             className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
           >
-            <span>Mở Thiệp Chúc ✉️</span>
+            <span>Mở Thẻ Vinh Danh ✈️</span>
             <motion.span
-              animate={{ x: [0, 4, 0] }}
+              animate={{ x: [0, 5, 0] }}
               transition={{ repeat: Infinity, duration: 1.2 }}
             >
               →
@@ -423,268 +450,58 @@ function Stage2SoothingSky({ skyMessages, onNextStage }) {
 }
 
 // ─────────────────────────────────────────────
-// STAGE 3: Sealed Envelope & Typewriter Letter
-// Displays sealed envelope, tapping wax seal opens letter and types content smoothly.
-// Button: "Xem Kỷ Niệm →"
+// STAGE 3: Honor Card Redesign (Visa Passport / Boarding Pass Style)
+// Direct transition from Stage 2 bouquet (Skip photo gallery).
+// Container:
+// w-full aspect-[9/16] max-h-[65vh] rounded-3xl p-6 bg-gradient-to-br from-slate-900 via-rose-950 to-purple-950 border border-pink-500/30 shadow-2xl flex flex-col justify-between relative overflow-hidden text-center mx-auto
+// Content: Avatar, student name, general class wishes, personalized sticker icons arranged naturally around card matching traits.
+// Customs departure seal stamp "CÔ GÁI CỦA NĂM" animated stamping down at corner.
+// Staggered framer-motion animations.
+// Fully functional html2canvas PNG download button & restart button.
 // ─────────────────────────────────────────────
-function Stage3SealedEnvelope({ student, onNextStage }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [letterTypedText, setLetterTypedText] = useState('');
-  const [letterComplete, setLetterComplete] = useState(false);
-
-  const rawLetter = student?.letter_content || FALLBACK.letter_content;
-
-  const handleOpenEnvelope = () => {
-    if (isOpen) return;
-    setIsOpen(true);
-    confetti({
-      particleCount: 85,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#ec4899', '#fbbf24', '#f43f5e', '#ffffff']
-    });
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    let index = 0;
-    setLetterTypedText('');
-
-    const timer = setInterval(() => {
-      if (index < rawLetter.length) {
-        setLetterTypedText(rawLetter.slice(0, index + 1));
-        index++;
-      } else {
-        clearInterval(timer);
-        setLetterComplete(true);
-      }
-    }, 30);
-
-    return () => clearInterval(timer);
-  }, [isOpen, rawLetter]);
-
-  return (
-    <motion.div
-      key="stage-3"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.6 }}
-      className="absolute inset-0 z-20 flex flex-col justify-between p-5 bg-gradient-to-b from-slate-950 via-rose-950 to-purple-950 text-white overflow-y-auto no-scrollbar"
-    >
-      <AmbientParticles />
-
-      {/* Header */}
-      <div className="z-10 text-center pt-2">
-        <span className="text-amber-300 text-[10px] font-bold tracking-widest uppercase bg-white/10 px-3 py-1 rounded-full border border-amber-300/30">
-          💌 BỨC THƯ TỪ TRÁI TIM
-        </span>
-      </div>
-
-      {/* Sealed Envelope / Unfolded Letter */}
-      <div className="z-10 my-auto flex flex-col items-center justify-center w-full max-w-xs mx-auto py-4">
-        {!isOpen ? (
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            whileHover={{ scale: 1.02 }}
-            className="w-full bg-gradient-to-br from-rose-900 via-pink-900 to-purple-900 border-2 border-pink-400/40 rounded-3xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[280px] relative overflow-hidden"
-          >
-            <div className="text-center z-10 pt-3">
-              <span className="text-xs text-pink-200 uppercase font-semibold tracking-wider">
-                Gửi tới
-              </span>
-              <h2 className="text-xl font-extrabold text-amber-200 mt-1">
-                {student?.name || FALLBACK.name} 💖
-              </h2>
-            </div>
-
-            {/* Wax Seal Badge labeled "Mở" */}
-            <motion.div
-              whileTap={{ scale: 0.9 }}
-              onClick={handleOpenEnvelope}
-              className="z-10 flex flex-col items-center cursor-pointer my-4"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-600 to-rose-800 border-2 border-amber-300 flex items-center justify-center shadow-2xl wax-seal-glow">
-                <span className="text-amber-200 font-extrabold text-sm uppercase tracking-wide">
-                  Mở
-                </span>
-              </div>
-              <span className="text-[11px] text-pink-200 font-medium mt-2">
-                Nhấn vào dấu sáp để mở ✉️
-              </span>
-            </motion.div>
-
-            <div className="text-[10px] text-pink-300/60 z-10">
-              ✨ 20 Tháng 10 Special Letter
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.6, type: 'spring' }}
-            className="w-full bg-amber-50 text-slate-800 rounded-3xl p-5 shadow-2xl border-4 border-amber-200 relative text-left min-h-[300px] flex flex-col justify-between"
-          >
-            <div className="flex justify-between items-center border-b border-amber-200 pb-3 mb-2">
-              <div>
-                <p className="text-[10px] font-bold text-rose-800 uppercase tracking-wider">
-                  THƯ CHÚC MỪNG 20/10
-                </p>
-                <p className="text-xs font-black text-slate-900">
-                  Thân gửi: {student?.name || FALLBACK.name}
-                </p>
-              </div>
-              <span className="text-2xl">🌹</span>
-            </div>
-
-            <div className="text-xs sm:text-sm font-medium leading-relaxed text-slate-800 whitespace-pre-wrap font-serif my-auto py-2">
-              <span className={!letterComplete ? 'typing-cursor' : ''}>
-                {letterTypedText}
-              </span>
-            </div>
-
-            <div className="pt-2 border-t border-amber-200 text-right">
-              <p className="text-[11px] font-bold text-rose-900 italic">
-                — Trân trọng & Yêu thương ❤️
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Button: "Xem Kỷ Niệm →" */}
-      <div className="z-10 pb-4">
-        {letterComplete && (
-          <motion.button
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onNextStage}
-            className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
-          >
-            <span>Xem Kỷ Niệm 📸</span>
-            <motion.span
-              animate={{ x: [0, 4, 0] }}
-              transition={{ repeat: Infinity, duration: 1.2 }}
-            >
-              →
-            </motion.span>
-          </motion.button>
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// STAGE 4: Progressive Photo Gallery & Spaced Layout
-// Clean vertical stack with generous spacing (py-10, gap-12). Progressive reveal on scroll.
-// Button: "Xem Thẻ Vinh Danh (9:16) ✨"
-// ─────────────────────────────────────────────
-function Stage4PhotoGallery({ memories, onNextStage }) {
-  return (
-    <motion.div
-      key="stage-4"
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.6 }}
-      className="absolute inset-0 z-20 flex flex-col justify-between p-5 bg-gradient-to-b from-slate-950 via-pink-950 to-purple-950 text-white overflow-y-auto no-scrollbar"
-    >
-      <AmbientParticles />
-
-      {/* Header */}
-      <div className="z-10 text-center pt-2 mb-2 shrink-0">
-        <span className="text-pink-300 text-[10px] font-bold tracking-widest uppercase bg-white/10 px-3 py-1 rounded-full border border-pink-300/30">
-          📸 ALBUM KỶ NIỆM
-        </span>
-        <h2 className="text-xl font-black text-white mt-1">
-          Khoảnh Khắc Đáng Nhớ
-        </h2>
-      </div>
-
-      {/* Progressive Reveal Vertical Stack with py-10, gap-12 spacing */}
-      <div className="z-10 flex flex-col items-center py-10 gap-12 w-full max-w-xs mx-auto">
-        {memories.map((mem, index) => (
-          <motion.div
-            key={mem.id}
-            initial={{ opacity: 0, y: 30, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-            whileHover={{ scale: 1.04, rotate: 0 }}
-            className="w-full max-w-[250px] sm:max-w-[270px] bg-white text-gray-800 p-3 pb-3.5 rounded-xl shadow-2xl relative transition-transform"
-            style={{ transform: `rotate(${mem.rotate || '0deg'})` }}
-          >
-            {/* Washi Tape */}
-            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-pink-200/90 border border-white/60 rounded-sm shadow-sm z-10" />
-
-            {/* Sticker */}
-            <div className="absolute top-1 right-1 text-xl z-10 select-none">
-              {mem.sticker || '✨'}
-            </div>
-
-            {/* Photo */}
-            <div className="w-full bg-gray-100 rounded-lg overflow-hidden shadow-inner">
-              <img
-                src={mem.url}
-                alt={mem.caption}
-                className="w-full h-38 sm:h-44 object-cover"
-                onError={e => {
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80';
-                }}
-              />
-            </div>
-
-            {/* Caption */}
-            <p className="mt-2.5 text-center font-bold text-xs sm:text-sm text-rose-950 font-serif">
-              {mem.caption}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Final Button: "Xem Thẻ Vinh Danh (9:16) ✨" */}
-      <div className="z-10 pb-4 pt-4 shrink-0">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onNextStage}
-          className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl border border-pink-300/40"
-          style={{
-            background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
-            boxShadow: '0 4px 20px rgba(236, 72, 153, 0.5)',
-          }}
-        >
-          <span>Xem Thẻ Vinh Danh (9:16) ✨</span>
-          <motion.span
-            animate={{ x: [0, 5, 0] }}
-            transition={{ repeat: Infinity, duration: 1.2 }}
-          >
-            →
-          </motion.span>
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// STAGE 5: Honor Card 9:16 View & html2canvas Download
-// Hidden by default, appears on stage 5. Strict aspect-[9/16] card.
-// ─────────────────────────────────────────────
-function Stage5HonorCard({ student, onRestart }) {
+function Stage3HonorVisaCard({ student, onRestart }) {
   const cardRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
   const [done, setDone] = useState(false);
+
+  const studentData = student || FALLBACK;
+  const stickers = studentData.stickers && studentData.stickers.length > 0 ? studentData.stickers : FALLBACK.stickers;
+  const wishesList = studentData.wishes && studentData.wishes.length > 0 ? studentData.wishes : FALLBACK.wishes;
+
+  // Staggered framer-motion animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.92 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.18,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
+
+  const stampVariants = {
+    hidden: { opacity: 0, scale: 2.2, rotate: -35 },
+    visible: {
+      opacity: 0.95,
+      scale: 1,
+      rotate: -12,
+      transition: { delay: 1.1, duration: 0.5, type: 'spring', stiffness: 220, damping: 15 },
+    },
+  };
 
   const handleDownload = useCallback(async () => {
     if (!cardRef.current || downloading) return;
     setDownloading(true);
 
     try {
-      const studentAvatar = student.avatar_url || FALLBACK.avatar_url;
+      const studentAvatar = studentData.avatar_url || FALLBACK.avatar_url;
       let avatarSrc = studentAvatar;
       try {
         const res = await fetch(studentAvatar);
@@ -695,7 +512,7 @@ function Stage5HonorCard({ student, onRestart }) {
           reader.readAsDataURL(blob);
         });
       } catch {
-        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name || 'Hoa')}&background=be185d&color=fff&size=256`;
+        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || 'Hoa')}&background=e11d48&color=fff&size=256`;
       }
 
       const imgEl = cardRef.current.querySelector('img');
@@ -716,7 +533,7 @@ function Stage5HonorCard({ student, onRestart }) {
 
       const link = document.createElement('a');
       link.href = canvas.toDataURL('image/png');
-      link.download = `The-Vinh-Danh-${(student.name || 'Hoa').replace(/\s+/g, '-')}.png`;
+      link.download = `Visa-Vinh-Danh-${(studentData.name || 'Hoa').replace(/\s+/g, '-')}.png`;
       link.click();
       setDone(true);
       setTimeout(() => setDone(false), 3000);
@@ -725,7 +542,7 @@ function Stage5HonorCard({ student, onRestart }) {
         particleCount: 110,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ['#ec4899', '#f9a8d4', '#fbbf24', '#ffffff'],
+        colors: ['#f43f5e', '#fbbf24', '#ec4899', '#a855f7'],
       });
     } catch (err) {
       console.error('html2canvas download error:', err);
@@ -733,11 +550,11 @@ function Stage5HonorCard({ student, onRestart }) {
     } finally {
       setDownloading(false);
     }
-  }, [student, downloading]);
+  }, [studentData, downloading]);
 
   return (
     <motion.div
-      key="stage-5"
+      key="stage-3"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
@@ -746,67 +563,141 @@ function Stage5HonorCard({ student, onRestart }) {
     >
       <AmbientParticles />
 
-      <div className="w-full text-center pt-1 z-10">
+      {/* Header Badge */}
+      <div className="w-full text-center pt-1 z-10 shrink-0">
         <span className="text-amber-300 text-[10px] font-bold uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full border border-amber-300/30">
-          ✨ THẺ VINH DANH STORY ✨
+          ✈️ VIP BOARDING PASS & PASSPORT VISA ✈️
         </span>
       </div>
 
-      {/* Strict 9:16 Aspect Ratio Honor Card */}
-      <div
+      {/* Visa Passport / Boarding Pass Card */}
+      <motion.div
         ref={cardRef}
-        className="w-full aspect-[9/16] max-h-[60vh] rounded-3xl p-5 bg-gradient-to-br from-pink-600 via-rose-500 to-purple-700 shadow-2xl flex flex-col justify-between text-center mx-auto relative overflow-hidden z-10 my-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full aspect-[9/16] max-h-[65vh] rounded-3xl p-6 bg-gradient-to-br from-slate-900 via-rose-950 to-purple-950 border border-pink-500/30 shadow-2xl flex flex-col justify-between relative overflow-hidden text-center mx-auto my-auto z-10"
       >
-        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/10 pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
+        {/* Subtle Watermark Plane Pattern */}
+        <div className="absolute top-0 right-0 w-36 h-36 bg-pink-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex justify-between items-center text-[10px] tracking-widest uppercase font-bold text-white/80 z-10">
-          <span>🌸 20/10</span>
-          <span>🏅 HONOR CARD</span>
-        </div>
+        {/* Personalized Sticker Icons arranged naturally around card */}
+        <motion.div
+          variants={itemVariants}
+          className="absolute top-10 left-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[-12deg]"
+        >
+          {stickers[0] || '🌸'}
+        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="absolute top-10 right-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[15deg]"
+        >
+          {stickers[1] || '✨'}
+        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="absolute bottom-16 left-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[8deg]"
+        >
+          {stickers[2] || '👑'}
+        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="absolute bottom-16 right-3 text-2xl sm:text-3xl filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 select-none z-20 rotate-[-18deg]"
+        >
+          {stickers[3] || '💖'}
+        </motion.div>
 
+        {/* Boarding Pass Top Header Accent */}
+        <motion.div
+          variants={itemVariants}
+          className="flex justify-between items-center text-[10px] tracking-widest uppercase font-extrabold text-pink-300 z-10 border-b border-pink-500/30 pb-2.5"
+        >
+          <div className="flex items-center gap-1.5 text-amber-200">
+            <span className="text-sm">✈️</span>
+            <span>20-10 OFFICIAL VISA</span>
+          </div>
+          <div className="bg-rose-600/80 text-white font-black px-2.5 py-0.5 rounded-md text-[9px] tracking-wider shadow-xs border border-rose-400/40">
+            CLASS: VIP
+          </div>
+        </motion.div>
+
+        {/* Passport Main Section (Avatar, Name, Traits, Wishes) */}
         <div className="flex flex-col items-center justify-center gap-2 my-auto z-10">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-pink-300/80 shadow-lg mx-auto overflow-hidden shrink-0">
-            <img
-              src={student.avatar_url || FALLBACK.avatar_url}
-              alt={student.name}
-              className="w-full h-full object-cover"
-              crossOrigin="anonymous"
-              onError={e => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name || 'Hoa')}&background=be185d&color=fff&size=256`;
-              }}
-            />
-          </div>
+          {/* Main Student Avatar Photo */}
+          <motion.div variants={itemVariants} className="relative">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-300/80 p-1 bg-slate-900 shadow-xl mx-auto overflow-hidden shrink-0">
+              <img
+                src={studentData.avatar_url || FALLBACK.avatar_url}
+                alt={studentData.name}
+                className="w-full h-full object-cover rounded-xl"
+                crossOrigin="anonymous"
+                onError={e => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || 'Hoa')}&background=e11d48&color=fff&size=256`;
+                }}
+              />
+            </div>
+            {/* Sticker on avatar frame */}
+            <span className="absolute -top-3 -right-3 text-xl bg-slate-900/90 p-1 rounded-full border border-amber-300/60 shadow-md select-none rotate-12">
+              {stickers[4] || '🎓'}
+            </span>
+          </motion.div>
 
-          <div className="bg-white/20 border border-white/40 rounded-full px-3 py-0.5 text-[10px] font-bold tracking-wider uppercase text-amber-200 shrink-0 mt-1">
-            {student.title || FALLBACK.title}
-          </div>
+          {/* Student Name */}
+          <motion.h2 variants={itemVariants} className="text-lg sm:text-xl font-black text-amber-200 leading-tight drop-shadow-md mt-1">
+            {studentData.name || FALLBACK.name}
+          </motion.h2>
 
-          <h2 className="text-lg sm:text-xl font-black text-white leading-tight drop-shadow-md">
-            {student.name || FALLBACK.name}
-          </h2>
+          {/* Individual Traits Badge */}
+          <motion.div variants={itemVariants} className="bg-pink-500/20 border border-pink-400/40 rounded-full px-3 py-0.5 text-[10px] font-extrabold tracking-wider uppercase text-pink-200 shrink-0 shadow-xs">
+            {studentData.vibe || studentData.title || FALLBACK.vibe}
+          </motion.div>
 
-          <p className="text-pink-100/90 text-xs italic max-w-[220px]">
-            {student.vibe || FALLBACK.vibe}
-          </p>
-
-          <div className="w-8 h-0.5 bg-white/40 rounded-full my-0.5" />
-
-          <div className="bg-black/25 border border-white/20 rounded-xl p-2.5 max-w-[220px] w-full text-center">
-            <p className="text-[9px] uppercase font-bold text-amber-300 tracking-wider mb-0.5">Món Quà Dành Tặng 🎁</p>
-            <p className="text-[10px] text-white/95 font-medium leading-tight">
-              {student.gift || FALLBACK.gift}
+          {/* General Class Wishes Box */}
+          <motion.div variants={itemVariants} className="bg-black/40 border border-white/10 rounded-xl p-2.5 max-w-[240px] w-full text-center mt-1 shadow-inner backdrop-blur-xs">
+            <p className="text-[9px] uppercase font-black text-amber-300 tracking-wider mb-1 flex items-center justify-center gap-1">
+              <span>💌</span> LỜI CHÚC TỪ TẬP THỂ
             </p>
+            <p className="text-[10px] text-pink-100 font-medium leading-relaxed italic line-clamp-2">
+              "{wishesList[0]?.text || studentData.quote || FALLBACK.quote}"
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Custom Departure/Customs Seal Stamp Effect ("CÔ GÁI CỦA NĂM") */}
+        <motion.div
+          variants={stampVariants}
+          className="absolute bottom-10 right-3 z-20 pointer-events-none"
+        >
+          <div className="w-22 h-22 sm:w-24 sm:h-24 rounded-full border-2 border-dashed border-amber-400 text-amber-300 bg-rose-950/90 backdrop-blur-xs flex flex-col items-center justify-center p-1 text-center shadow-2xl rotate-[-12deg]">
+            <span className="text-[7px] font-black uppercase tracking-widest text-pink-200">★ APPROVED ★</span>
+            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-300 leading-tight my-0.5 drop-shadow-md">
+              CÔ GÁI<br />CỦA NĂM
+            </span>
+            <span className="text-[7px] font-bold text-pink-200">20/10 VISA</span>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="pt-1.5 border-t border-white/20 text-[9px] text-white/70 font-medium z-10">
-          ✨ Special Honor Card · 20/10 ✨
-        </div>
-      </div>
+        {/* Boarding Pass Bottom Barcode & Footer */}
+        <motion.div variants={itemVariants} className="pt-2 border-t border-pink-500/30 text-center z-10">
+          <div className="flex justify-between items-center text-[8px] text-pink-300/80 font-mono font-bold tracking-wider mb-1">
+            <span>PASSPORT NO: 2010-2025</span>
+            <span>GATE: LOVE-01</span>
+          </div>
+          <div className="w-full h-4 bg-amber-100/90 rounded flex items-center justify-center gap-1 overflow-hidden opacity-90">
+            {Array.from({ length: 28 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-full bg-slate-900"
+                style={{ width: `${(i % 3) * 2 + 1}px`, opacity: i % 2 === 0 ? 1 : 0.4 }}
+              />
+            ))}
+          </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Action Buttons */}
-      <div className="w-full max-w-xs flex flex-col gap-2 z-10 pb-2">
+      {/* Actions: html2canvas PNG download button & restart button */}
+      <div className="w-full max-w-xs flex flex-col gap-2 z-10 pb-2 shrink-0">
         <motion.button
           onClick={handleDownload}
           disabled={downloading}
@@ -815,7 +706,7 @@ function Stage5HonorCard({ student, onRestart }) {
           style={{
             background: done
               ? 'linear-gradient(135deg, #16a34a, #15803d)'
-              : 'linear-gradient(135deg, #be185d, #9d174d)',
+              : 'linear-gradient(135deg, #e11d48, #be123c)',
             opacity: downloading ? 0.7 : 1,
           }}
         >
@@ -827,13 +718,13 @@ function Stage5HonorCard({ student, onRestart }) {
               >
                 ⏳
               </motion.span>
-              Đang tạo ảnh vinh danh…
+              Đang tạo Visa Vinh Danh…
             </>
           ) : done ? (
-            <>✅ Đã tải ảnh vinh danh!</>
+            <>✅ Đã tải Visa Vinh Danh (.png)!</>
           ) : (
             <>
-              📥 Tải ảnh vinh danh (.png)
+              📥 Tải ảnh Visa Vinh Danh (.png)
             </>
           )}
         </motion.button>
@@ -841,7 +732,7 @@ function Stage5HonorCard({ student, onRestart }) {
         <motion.button
           onClick={onRestart}
           whileTap={{ scale: 0.95 }}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs text-rose-200 bg-white/10 hover:bg-white/15 border border-white/15 cursor-pointer transition-all"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs text-pink-200 bg-white/10 hover:bg-white/15 border border-white/15 cursor-pointer transition-all"
         >
           ← Xem lại từ đầu
         </motion.button>
@@ -856,7 +747,7 @@ function Stage5HonorCard({ student, onRestart }) {
 export default function App() {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentStage, setCurrentStage] = useState(1); // Stage 1 to 5
+  const [currentStage, setCurrentStage] = useState(1); // Stages 1, 2, 3
 
   useEffect(() => {
     async function fetchStudent() {
@@ -889,7 +780,7 @@ export default function App() {
   }, []);
 
   const handleNextStage = () => {
-    setCurrentStage(prev => Math.min(5, prev + 1));
+    setCurrentStage(prev => Math.min(3, prev + 1));
   };
 
   const handleRestart = () => {
@@ -925,28 +816,14 @@ export default function App() {
             )}
 
             {currentStage === 2 && (
-              <Stage2SoothingSky
+              <Stage2MiniCardAndBouquet
                 skyMessages={student?.sky_messages || FALLBACK.sky_messages}
                 onNextStage={handleNextStage}
               />
             )}
 
             {currentStage === 3 && (
-              <Stage3SealedEnvelope
-                student={student}
-                onNextStage={handleNextStage}
-              />
-            )}
-
-            {currentStage === 4 && (
-              <Stage4PhotoGallery
-                memories={student?.memories || FALLBACK.memories}
-                onNextStage={handleNextStage}
-              />
-            )}
-
-            {currentStage === 5 && (
-              <Stage5HonorCard
+              <Stage3HonorVisaCard
                 student={student}
                 onRestart={handleRestart}
               />
