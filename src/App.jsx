@@ -101,10 +101,10 @@ const DownloadIcon = () => (
   </svg>
 );
 
-const ArrowDownIcon = () => (
+const ArrowLeftIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <polyline points="19 12 12 19 5 12" />
+    <line x1="19" y1="12" x2="5" y2="12" />
+    <polyline points="12 19 5 12 12 5" />
   </svg>
 );
 
@@ -229,7 +229,7 @@ function HonorCardView({ student, onBack }) {
       {/* 9:16 Aspect Ratio Honor Card - Strict Specs */}
       <div
         ref={cardRef}
-        className="w-full aspect-[9/16] max-h-[65vh] rounded-3xl p-5 bg-gradient-to-br from-pink-600 via-rose-500 to-purple-700 shadow-2xl flex flex-col justify-between relative overflow-hidden text-center mx-auto"
+        className="w-full aspect-[9/16] max-h-[60vh] rounded-3xl p-5 bg-gradient-to-br from-pink-600 via-rose-500 to-purple-700 shadow-2xl flex flex-col justify-between relative overflow-hidden text-center mx-auto"
       >
         <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/10 pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
@@ -240,7 +240,7 @@ function HonorCardView({ student, onBack }) {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-2 my-auto z-10">
-          <div className="w-22 h-22 sm:w-26 sm:h-26 rounded-full object-cover border-4 border-pink-300/80 shadow-lg mx-auto overflow-hidden shrink-0">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-pink-300/80 shadow-lg mx-auto overflow-hidden shrink-0">
             <img
               src={student.avatar_url || FALLBACK.avatar_url}
               alt={student.name}
@@ -256,7 +256,7 @@ function HonorCardView({ student, onBack }) {
             {student.title || FALLBACK.title}
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black text-white leading-tight drop-shadow-md">
+          <h2 className="text-lg sm:text-xl font-black text-white leading-tight drop-shadow-md">
             {student.name || FALLBACK.name}
           </h2>
 
@@ -315,7 +315,7 @@ function HonorCardView({ student, onBack }) {
           whileTap={{ scale: 0.95 }}
           className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs text-rose-200 bg-white/10 hover:bg-white/15 border border-white/15 cursor-pointer transition-all"
         >
-          <BackIcon /> Quay lại
+          <BackIcon /> ← Quay lại
         </motion.button>
       </div>
     </motion.div>
@@ -402,32 +402,11 @@ export default function App() {
             />
           </div>
         ) : (
-          <div key="main-app" className="absolute inset-0 z-10 flex flex-col justify-between p-4 sm:p-5">
+          <div key="main-app" className="absolute inset-0 z-10 flex flex-col p-4 sm:p-5">
             <FloatingStickers />
 
-            {/* Top Sub-Tab Navigation Indicators */}
-            <div className="relative z-10 flex items-center justify-between gap-1.5 p-1.5 bg-black/30 backdrop-blur-md rounded-2xl border border-white/10 shrink-0">
-              {TABS.map((tab, idx) => {
-                const isActive = activeTab === idx;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(idx)}
-                    className={`flex-1 py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                      isActive
-                        ? 'bg-gradient-to-r from-pink-600 to-rose-500 text-white shadow-md'
-                        : 'text-rose-200/70 hover:text-white'
-                    }`}
-                  >
-                    <span>{tab.icon}</span>
-                    <span className="truncate">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Sub-Tab Content View */}
-            <div className="flex-1 overflow-y-auto my-3 relative z-10 flex flex-col">
+            {/* Scrollable Content Container */}
+            <div className="flex-1 overflow-y-auto relative z-10 flex flex-col justify-between">
               <AnimatePresence mode="wait">
                 {activeTab === 0 && (
                   <motion.div
@@ -436,7 +415,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col gap-4 my-auto py-2"
+                    className="flex flex-col gap-4 py-2"
                   >
                     {/* Student Profile Card */}
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl flex flex-col items-center text-center gap-3 shadow-xl">
@@ -523,7 +502,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col gap-4 my-auto py-2"
+                    className="flex flex-col gap-4 py-2"
                   >
                     <div className="flex items-center justify-between border-b border-pink-400/20 pb-2">
                       <span className="text-pink-300 text-xs tracking-widest uppercase font-bold flex items-center gap-1.5">
@@ -531,27 +510,27 @@ export default function App() {
                       </span>
                     </div>
 
-                    <div className="flex flex-col gap-5 items-center">
+                    <div className="flex flex-col gap-4 items-center w-full">
                       {memoriesList.map((mem) => (
                         <div
                           key={mem.id}
-                          className="w-full bg-white text-gray-800 p-3 pb-4 rounded-sm shadow-2xl relative transition-transform"
+                          className="w-full max-w-[85%] sm:max-w-[320px] mx-auto bg-white text-gray-800 p-2.5 pb-3 rounded-md shadow-xl relative transition-transform"
                           style={{ transform: `rotate(${mem.rotate || '0deg'})` }}
                         >
                           {/* Washi Tape */}
-                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-pink-200/80 border border-white/60 rounded-sm shadow-sm z-10" />
+                          <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-pink-200/80 border border-white/60 rounded-sm shadow-sm z-10" />
 
                           {/* Sticker */}
-                          <div className="absolute top-2 right-2 text-2xl z-10">
+                          <div className="absolute top-1.5 right-1.5 text-xl z-10 select-none">
                             {mem.sticker || '✨'}
                           </div>
 
                           {/* Photo Box */}
-                          <div className="aspect-[4/3] w-full bg-gray-100 rounded-xs overflow-hidden shadow-inner">
+                          <div className="w-full aspect-[4/3] bg-gray-100 rounded-xs overflow-hidden shadow-inner">
                             <img
                               src={mem.url}
                               alt={mem.caption}
-                              className="w-full h-full object-cover"
+                              className="w-full aspect-[4/3] object-cover"
                               onError={e => {
                                 e.currentTarget.src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80';
                               }}
@@ -559,7 +538,7 @@ export default function App() {
                           </div>
 
                           {/* Caption */}
-                          <p className="mt-3 text-center font-bold text-xs text-rose-950 tracking-wide font-serif">
+                          <p className="mt-2 text-center font-bold text-[11px] sm:text-xs text-rose-950 tracking-wide font-serif">
                             {mem.caption}
                           </p>
                         </div>
@@ -575,7 +554,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col gap-4 my-auto py-2"
+                    className="flex flex-col gap-4 py-2"
                   >
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 text-center flex flex-col items-center gap-4 shadow-lg relative overflow-hidden">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1">
@@ -620,45 +599,77 @@ export default function App() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
 
-            {/* Bottom Navigation Arrow or Honor Card Action Button */}
-            <div className="relative z-10 shrink-0 pt-1 pb-1">
-              {!isLastTab ? (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveTab(prev => Math.min(prev + 1, TABS.length - 1))}
-                  className="w-full py-3.5 px-4 rounded-2xl font-bold text-xs text-white bg-white/15 hover:bg-white/20 border border-white/20 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
-                >
-                  <span>Xem tiếp</span>
-                  <motion.span
-                    animate={{ y: [0, 4, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+              {/* Bottom Navigation Bar (Non-sticky, placed at absolute bottom of scrollable content) */}
+              <div className="shrink-0 pt-4 pb-2 flex flex-col gap-2 mt-auto">
+                {isLastTab && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleOpenHonorCard}
+                    className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all border border-pink-300/40"
+                    style={{
+                      background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
+                      boxShadow: '0 4px 20px rgba(236, 72, 153, 0.5)',
+                    }}
                   >
-                    <ArrowDownIcon />
-                  </motion.span>
-                </motion.button>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleOpenHonorCard}
-                  className="w-full py-4 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all border border-pink-300/40"
-                  style={{
-                    background: 'linear-gradient(135deg, #ec4899, #be185d, #a21caf)',
-                    boxShadow: '0 4px 20px rgba(236, 72, 153, 0.5)',
-                  }}
-                >
-                  <span>Nhận Thẻ Vinh Danh ✨</span>
-                  <motion.span
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                    <span>Nhận Thẻ Vinh Danh (9:16) ✨</span>
+                    <motion.span
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                    >
+                      <ArrowRightIcon />
+                    </motion.span>
+                  </motion.button>
+                )}
+
+                <div className="flex items-center justify-between px-3 py-2 bg-black/30 backdrop-blur-md rounded-2xl border border-white/10">
+                  {/* Left Arrow Button */}
+                  <button
+                    onClick={() => setActiveTab(prev => Math.max(0, prev - 1))}
+                    disabled={activeTab === 0}
+                    className={`p-2 rounded-xl transition-all flex items-center justify-center ${
+                      activeTab === 0
+                        ? 'opacity-30 cursor-not-allowed text-white/40'
+                        : 'text-white hover:bg-white/15 cursor-pointer active:scale-95'
+                    }`}
+                    aria-label="Previous Tab"
+                  >
+                    <ArrowLeftIcon />
+                  </button>
+
+                  {/* Pagination Dots */}
+                  <div className="flex items-center gap-2">
+                    {TABS.map((tab, idx) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(idx)}
+                        className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                          activeTab === idx
+                            ? 'w-6 bg-gradient-to-r from-pink-400 to-rose-400'
+                            : 'w-2.5 bg-white/30 hover:bg-white/50'
+                        }`}
+                        aria-label={`Go to ${tab.label}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Right Arrow Button */}
+                  <button
+                    onClick={() => {
+                      if (!isLastTab) {
+                        setActiveTab(prev => Math.min(TABS.length - 1, prev + 1));
+                      } else {
+                        handleOpenHonorCard();
+                      }
+                    }}
+                    className="p-2 rounded-xl text-white hover:bg-white/15 cursor-pointer active:scale-95 transition-all flex items-center justify-center"
+                    aria-label={isLastTab ? "Nhận Thẻ Vinh Danh" : "Next Tab"}
                   >
                     <ArrowRightIcon />
-                  </motion.span>
-                </motion.button>
-              )}
+                  </button>
+                </div>
+              </div>
             </div>
 
           </div>
