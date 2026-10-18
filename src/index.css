@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* ── Google Fonts ── */
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Be Vietnam Pro', sans-serif;
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Mobile viewport fix ── */
+.app-shell {
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a0a14 0%, #2d0a20 50%, #1a0010 100%);
+  overflow: hidden;
+}
+
+.phone-frame {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollable inner area ── */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── Floating petals background ── */
+@keyframes floatUp {
+  0%   { transform: translateY(100vh) rotate(0deg) scale(0.6); opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(-20vh) rotate(720deg) scale(1); opacity: 0; }
+}
+
+.petal {
+  position: absolute;
+  pointer-events: none;
+  animation: floatUp linear infinite;
+  font-size: 1.2rem;
+}
+
+/* ── Shimmer text effect ── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, #fbbf24, #fef9c3, #f59e0b, #fef3c7, #fbbf24);
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glow pulse on avatar ── */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.5); }
+  50%       { box-shadow: 0 0 0 12px rgba(236, 72, 153, 0); }
+}
+
+.avatar-glow {
+  animation: glowPulse 2.5s ease-in-out infinite;
+}
+
+/* ── Heartbeat for icon ── */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  15%       { transform: scale(1.25); }
+  30%       { transform: scale(1); }
+  45%       { transform: scale(1.15); }
+}
+
+.heartbeat {
+  animation: heartbeat 1.6s ease-in-out infinite;
+}
+
+/* ── Bounce arrow ── */
+@keyframes bounceY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(8px); }
+}
+
+.bounce-y {
+  animation: bounceY 1.2s ease-in-out infinite;
+}
+
+/* ── Story card (html2canvas target) ──
+   No border-radius, no transforms, no backdrop-filter — all break canvas */
+.story-canvas-target {
+  border-radius: 0 !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  font-family: var(--font-body) !important;
+}
+
+/* ── Safe area ── */
+.pb-safe {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* ── Tab active underline ── */
+.tab-btn {
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  border-radius: 9999px;
+  background: #ec4899;
+  transition: width 0.3s ease;
+}
+
+.tab-btn.active::after {
+  width: 70%;
+}
+
+/* ── Card glass ── */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ── Gradient border ── */
+.gradient-border {
+  position: relative;
+  background: linear-gradient(135deg, #831843, #9d174d, #831843);
+  padding: 2px;
+  border-radius: 9999px;
+}
+
+.gradient-border-inner {
+  border-radius: 9999px;
+  overflow: hidden;
+}
