@@ -241,8 +241,7 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
     }
   };
 
-  // Slower, graceful blooming bouquet sequence when messages finished,
-  // then automatically transition to Stage 3 immediately after flower bouquet finishes blooming.
+  // Slower, graceful blooming bouquet sequence when messages finished
   useEffect(() => {
     if (!messagesFinished) return;
     const timers = [];
@@ -251,13 +250,8 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
     timers.push(setTimeout(() => setFlowerStage(3), 2600));
     timers.push(setTimeout(() => setFlowerStage(4), 3800));
 
-    // Auto-transition immediately after bouquet blooming finishes
-    timers.push(setTimeout(() => {
-      onNextStage();
-    }, 5000));
-
     return () => timers.forEach(t => clearTimeout(t));
-  }, [messagesFinished, onNextStage]);
+  }, [messagesFinished]);
 
   return (
     <motion.div
@@ -425,11 +419,25 @@ function Stage2MiniCardAndBouquet({ skyMessages, onNextStage }) {
         )}
       </div>
 
-      <div className="z-10 pb-4 h-12 flex items-end justify-center">
-        {messagesFinished && (
-          <span className="text-[11px] text-pink-300/80 animate-pulse">
-            Đang mở thiệp chúc mừng… 💌
-          </span>
+      {/* Bottom Action Button: "Xem Thiệp Lời Chúc ✉️ →" */}
+      <div className="z-10 pb-4 h-16 flex items-end w-full max-w-xs mx-auto">
+        {messagesFinished && flowerStage >= 4 && (
+          <motion.button
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onNextStage}
+            className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
+          >
+            <span>Xem Thiệp Lời Chúc ✉️</span>
+            <motion.span
+              animate={{ x: [0, 5, 0] }}
+              transition={{ repeat: Infinity, duration: 1.2 }}
+            >
+              →
+            </motion.span>
+          </motion.button>
         )}
       </div>
     </motion.div>
