@@ -28,6 +28,38 @@ const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/20
 
 const DEFAULT_STICKERS = ["🌸", "✨", "👑", "💖", "🎓", "🌺"];
 
+// ─────────────────────────────────────────────
+// Audio Sound Effects (SFX) Setup & Helpers
+// ─────────────────────────────────────────────
+const createAudio = (url) => {
+  if (typeof window === "undefined" || typeof Audio === "undefined") return null;
+  const audio = new Audio(url);
+  audio.preload = "auto";
+  return audio;
+};
+
+const bloomAudio = createAudio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
+const paperAudio = createAudio("https://assets.mixkit.co/active_storage/sfx/1470/1470-preview.mp3");
+const fireworksAudio = createAudio("https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3");
+
+const playBloomSFX = () => {
+  if (!bloomAudio) return;
+  bloomAudio.currentTime = 0;
+  bloomAudio.play().catch((err) => console.warn("Bloom SFX playback prevented:", err));
+};
+
+const playPaperSFX = () => {
+  if (!paperAudio) return;
+  paperAudio.currentTime = 0;
+  paperAudio.play().catch((err) => console.warn("Paper SFX playback prevented:", err));
+};
+
+const playFireworksSFX = () => {
+  if (!fireworksAudio) return;
+  fireworksAudio.currentTime = 0;
+  fireworksAudio.play().catch((err) => console.warn("Fireworks SFX playback prevented:", err));
+};
+
 const SEQUENTIAL_MESSAGES = [
   "Chúc các bạn nữ lớp 12¹",
   "Ngày phụ nữ Việt Nam 20/10",
@@ -105,6 +137,7 @@ function Stage1EnchantedRose({ onRoseTap }) {
         holdIntervalRef.current = null;
         justUnlockedRef.current = true;
         setIsUnlocked(true);
+        playBloomSFX();
       }
     }, 30);
   }, [isUnlocked]);
@@ -128,6 +161,7 @@ function Stage1EnchantedRose({ onRoseTap }) {
   const handleTapToProceed = () => {
     if (!isUnlocked || flashing || justUnlockedRef.current) return;
     setFlashing(true);
+    playBloomSFX();
     setTimeout(() => {
       onRoseTap();
     }, 500);
@@ -322,6 +356,8 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
 
   useEffect(() => {
     if (flowerStage !== 4) return;
+
+    playFireworksSFX();
 
     const duration = 2200;
     const animationEnd = Date.now() + duration;
@@ -540,6 +576,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
 
   const handleOpenCard = () => {
     if (isOpen) return;
+    playPaperSFX();
     setTypedCount(0);
     setTypingComplete(false);
     setIsOpen(true);
