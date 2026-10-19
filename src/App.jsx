@@ -532,14 +532,10 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
-  const studentName = student?.name || FALLBACK.name;
-  const rawWishText = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
-  const wishText = useMemo(() => (typeof rawWishText === "string" ? rawWishText.normalize("NFC") : rawWishText), [rawWishText]);
-
-  const headerText = useMemo(() => `Thân gửi ${studentName}`, [studentName]);
-  const sigText = "Từ tập thể lớp 12¹";
-
-  const totalLength = headerText.length + wishText.length + sigText.length;
+  const name = student?.name || FALLBACK.name;
+  const rawWish = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
+  const wish = typeof rawWish === "string" ? rawWish.normalize("NFC") : rawWish;
+  const fullText = "Thân gửi " + name + "\n\n" + wish + "\n\nTừ tập thể lớp 12¹";
 
   const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
@@ -553,29 +549,19 @@ function Stage3GreetingCard({ student, onNextStage }) {
 
   useEffect(() => {
     if (!isOpen) return;
-    let interval;
     let current = 0;
 
-    const startTimeout = setTimeout(() => {
-      interval = setInterval(() => {
-        current++;
-        setTypedCount(current);
-        if (current >= totalLength) {
-          setTypingComplete(true);
-          clearInterval(interval);
-        }
-      }, 55);
-    }, 400);
+    const interval = setInterval(() => {
+      current++;
+      setTypedCount(current);
+      if (current >= fullText.length) {
+        setTypingComplete(true);
+        clearInterval(interval);
+      }
+    }, 45);
 
-    return () => {
-      clearTimeout(startTimeout);
-      if (interval) clearInterval(interval);
-    };
-  }, [isOpen, totalLength]);
-
-  const headerDisplayed = headerText.slice(0, Math.min(typedCount, headerText.length));
-  const bodyDisplayed = wishText.slice(0, Math.max(0, Math.min(typedCount - headerText.length, wishText.length)));
-  const sigDisplayed = sigText.slice(0, Math.max(0, typedCount - headerText.length - wishText.length));
+    return () => clearInterval(interval);
+  }, [isOpen, fullText.length]);
 
   return (
     <motion.div
@@ -647,35 +633,12 @@ function Stage3GreetingCard({ student, onNextStage }) {
             style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
           >
             <div className="my-auto py-2 flex flex-col justify-between h-full">
-              {/* Header Line */}
-              <p className="text-lg sm:text-xl font-extrabold text-slate-900 mb-4 not-italic">
-                {headerDisplayed}
-                {typedCount <= headerText.length && !typingComplete && (
+              <p className="text-sm sm:text-base font-medium leading-relaxed text-slate-800 whitespace-pre-line">
+                {fullText.slice(0, typedCount)}
+                {!typingComplete && (
                   <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
                 )}
               </p>
-
-              {/* Body Content */}
-              {typedCount > headerText.length && (
-                <p className="text-sm sm:text-base font-medium leading-relaxed text-slate-800 italic my-2">
-                  {bodyDisplayed}
-                  {typedCount > headerText.length &&
-                    typedCount <= headerText.length + wishText.length &&
-                    !typingComplete && (
-                      <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
-                    )}
-                </p>
-              )}
-
-              {/* Signature Line */}
-              {typedCount > headerText.length + wishText.length && (
-                <p className="text-right mt-6 text-sm sm:text-base font-bold text-rose-700 not-italic">
-                  {sigDisplayed}
-                  {!typingComplete && (
-                    <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
-                  )}
-                </p>
-              )}
             </div>
           </motion.div>
         )}
