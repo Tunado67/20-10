@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 import confetti from "canvas-confetti";
 import bgImage from "./assets/IMG_20261018_222005.jpg";
 
@@ -711,47 +711,42 @@ function Stage4HonorVisaCard({ student, onRestart }) {
     },
   };
 
-  const handleDownload = useCallback(async () => {
-    if (!cardRef.current || downloading) return;
+  const downloadVisaCard = useCallback(async () => {
+    const cardElement = document.getElementById("visa-card") || cardRef.current;
+    if (!cardElement || downloading) return;
     setDownloading(true);
 
     try {
-      let avatarSrc = avatarUrl;
-      if (avatarUrl) {
-        try {
-          const res = await fetch(avatarUrl);
-          const blob = await res.blob();
-          avatarSrc = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-          });
-        } catch {
-          avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
+      let dataUrl;
+      try {
+        dataUrl = await htmlToImage.toPng(cardElement, {
+          quality: 0.95,
+          cacheBust: true,
+          useCORS: true, // Allow cross-origin images (Supabase avatars)
+          pixelRatio: 2, // High resolution output
+        });
+      } catch (firstError) {
+        console.warn("First attempt to generate image failed, retrying with fallback avatar:", firstError);
+        const imgEl = cardElement.querySelector("img");
+        const originalSrc = imgEl ? imgEl.src : null;
+        if (imgEl) {
+          imgEl.src = DEFAULT_AVATAR;
         }
-      } else {
-        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
+        try {
+          dataUrl = await htmlToImage.toPng(cardElement, {
+            quality: 0.95,
+            cacheBust: true,
+            useCORS: true,
+            pixelRatio: 2,
+          });
+        } finally {
+          if (imgEl && originalSrc) imgEl.src = originalSrc;
+        }
       }
 
-      const imgEl = cardRef.current.querySelector("img");
-      const originalSrc = imgEl ? imgEl.src : null;
-      if (imgEl) imgEl.src = avatarSrc;
-
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight,
-      });
-
-      if (imgEl && originalSrc) imgEl.src = originalSrc;
-
       const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = `Visa-Vinh-Danh-${(name || "HocSinh").replace(/\s+/g, "-")}.png`;
+      link.download = `Visa_20-10_${student?.name || "VinhDanh"}.png`;
+      link.href = dataUrl;
       link.click();
       setDone(true);
       setTimeout(() => setDone(false), 3000);
@@ -762,13 +757,13 @@ function Stage4HonorVisaCard({ student, onRestart }) {
         origin: { y: 0.6 },
         colors: ["#f43f5e", "#fbbf24", "#ec4899", "#a855f7"],
       });
-    } catch (err) {
-      console.error("html2canvas download error:", err);
+    } catch (error) {
+      console.error("Error generating Visa image:", error);
       alert("Không thể tải ảnh. Vui lòng thử lại!");
     } finally {
       setDownloading(false);
     }
-  }, [name, avatarUrl, downloading]);
+  }, [student, downloading]);
 
   return (
     <motion.div
@@ -787,6 +782,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
       <div className="h-4 shrink-0" />
 
       <motion.div
+        id="visa-card"
         ref={cardRef}
         variants={containerVariants}
         initial="hidden"
@@ -845,8 +841,9 @@ function Stage4HonorVisaCard({ student, onRestart }) {
           <motion.div variants={itemVariants} className="relative">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-rose-500 p-1 bg-white shadow-lg mx-auto overflow-hidden shrink-0">
               <img
-                src={avatarUrl}
-                alt={name}
+                src={student?.avatar_url || avatarUrl}
+                alt={student?.name || name}
+                crossOrigin="anonymous"
                 className="w-full h-full object-cover rounded-xl"
                 onError={e => {
                   e.currentTarget.src = DEFAULT_AVATAR;
@@ -907,7 +904,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
 
       <div className="w-full max-w-xs flex flex-col gap-2 z-10 pb-2 shrink-0">
         <motion.button
-          onClick={handleDownload}
+          onClick={downloadVisaCard}
           disabled={downloading}
           whileTap={{ scale: 0.95 }}
           className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs text-white transition-all cursor-pointer shadow-lg"
