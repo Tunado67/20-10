@@ -863,9 +863,17 @@ export default function App() {
   const [currentStage, setCurrentStage] = useState(1);
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showMusicModal, setShowMusicModal] = useState(true);
+
+  const setAudioVolume = () => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.25;
+    }
+  };
 
   const toggleAudio = () => {
     if (!audioRef.current) return;
+    setAudioVolume();
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -875,22 +883,22 @@ export default function App() {
     }
   };
 
+  const handleAcceptMusic = () => {
+    setAudioVolume();
+    if (audioRef.current) {
+      audioRef.current.play().catch(err => {
+        console.log("Audio play failed:", err);
+      });
+    }
+    setShowMusicModal(false);
+  };
+
+  const handleDeclineMusic = () => {
+    setShowMusicModal(false);
+  };
+
   useEffect(() => {
-    const handleFirstInteraction = () => {
-      if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play().catch(err => {
-          console.log("Autoplay on first interaction prevented or failed:", err);
-        });
-      }
-    };
-
-    window.addEventListener("pointerdown", handleFirstInteraction, { once: true });
-    window.addEventListener("keydown", handleFirstInteraction, { once: true });
-
-    return () => {
-      window.removeEventListener("pointerdown", handleFirstInteraction);
-      window.removeEventListener("keydown", handleFirstInteraction);
-    };
+    setAudioVolume();
   }, []);
 
   useEffect(() => {
@@ -977,6 +985,47 @@ export default function App() {
           <VolumeX className="w-5 h-5 text-slate-400" />
         )}
       </button>
+
+      {/* Initial Music Confirmation Modal */}
+      <AnimatePresence>
+        {showMusicModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="w-full max-w-xs sm:max-w-sm rounded-3xl bg-slate-900 border border-pink-300/30 p-6 shadow-2xl flex flex-col items-center text-center gap-5 text-white"
+            >
+              <div className="w-14 h-14 rounded-full bg-pink-500/20 border border-pink-400/40 flex items-center justify-center text-3xl">
+                🎵
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-pink-100 leading-snug drop-shadow-md">
+                {"Bạn có muốn một không gian tràn đầy âm nhạc không?".normalize("NFC")}
+              </h3>
+              <div className="flex gap-3 w-full mt-1">
+                <button
+                  onClick={handleAcceptMusic}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 transition-all shadow-lg active:scale-95 cursor-pointer"
+                >
+                  Có
+                </button>
+                <button
+                  onClick={handleDeclineMusic}
+                  className="flex-1 py-3 px-4 rounded-xl font-semibold text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-all active:scale-95 cursor-pointer"
+                >
+                  Không
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isLoading ? (
         <div className="min-h-screen bg-slate-950 text-rose-300 flex items-center justify-center font-sans">
