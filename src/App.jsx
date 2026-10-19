@@ -6,25 +6,9 @@ import confetti from "canvas-confetti";
 import bgImage from "./assets/IMG_20261018_222005.jpg";
 
 // ─────────────────────────────────────────────
-// Fallback Sample Data & Sequential Messages
+// Constants & Sequential Messages
 // ─────────────────────────────────────────────
-const FALLBACK = {
-  id: "demo",
-  name: "Hoa Xinh",
-  title: "Đoá Hoa Rực Rỡ 🌸",
-  vibe: "Năng Động & Tỏa Sáng ✨",
-  stickers: ["🌸", "✨", "👑", "💖", "🎓", "🌺"],
-  wish: "Mong bạn luôn xinh đẹp, tự tin và là phiên bản rực rỡ nhất của chính mình!",
-  quote: "Mong bạn luôn xinh đẹp, tự tin và là phiên bản rực rỡ nhất của chính mình!",
-  avatar_url: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop&q=80",
-  wishes: [
-    {
-      from: "Tập thể Lớp 12¹",
-      avatar: "https://ui-avatars.com/api/?name=Nam+Sinh&background=0284c7&color=fff",
-      text: "Chúc bạn ngày 20/10 luôn xinh đẹp, tràn ngập nụ cười và học tốt!"
-    }
-  ]
-};
+const DEFAULT_STICKERS = ["🌸", "✨", "👑", "💖", "🎓", "🌺"];
 
 const SEQUENTIAL_MESSAGES = [
   "Chúc các bạn nữ lớp 12¹",
@@ -533,10 +517,9 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
-  const name = student?.name || FALLBACK.name;
-  const rawWish = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.wish || FALLBACK.quote;
-  const wish = typeof rawWish === "string" ? rawWish.normalize("NFC") : rawWish;
-  const fullText = `Thân gửi ${name}\n\n${wish}\n\nTừ tập thể lớp 12¹`;
+  const name = student?.name || "";
+  const wish = student?.wish ? student.wish.normalize("NFC") : "";
+  const fullText = "Thân gửi " + name + "\n\n" + wish + "\n\nTừ tập thể lớp 12¹";
 
   const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
@@ -681,9 +664,10 @@ function Stage4HonorVisaCard({ student, onRestart }) {
   const [downloading, setDownloading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const studentData = student || FALLBACK;
-  const stickers = studentData.stickers && studentData.stickers.length > 0 ? studentData.stickers : FALLBACK.stickers;
-  const wishesList = studentData.wishes && studentData.wishes.length > 0 ? studentData.wishes : FALLBACK.wishes;
+  const stickers = DEFAULT_STICKERS;
+  const name = student?.name || "";
+  const wish = student?.wish || "";
+  const avatarUrl = student?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.92 },
@@ -717,18 +701,21 @@ function Stage4HonorVisaCard({ student, onRestart }) {
     setDownloading(true);
 
     try {
-      const studentAvatar = studentData.avatar_url || FALLBACK.avatar_url;
-      let avatarSrc = studentAvatar;
-      try {
-        const res = await fetch(studentAvatar);
-        const blob = await res.blob();
-        avatarSrc = await new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(blob);
-        });
-      } catch {
-        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || "Hoa")}&background=e11d48&color=fff&size=256`;
+      let avatarSrc = avatarUrl;
+      if (avatarUrl) {
+        try {
+          const res = await fetch(avatarUrl);
+          const blob = await res.blob();
+          avatarSrc = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+        } catch {
+          avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
+        }
+      } else {
+        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
       }
 
       const imgEl = cardRef.current.querySelector("img");
@@ -749,7 +736,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
 
       const link = document.createElement("a");
       link.href = canvas.toDataURL("image/png");
-      link.download = `Visa-Vinh-Danh-${(studentData.name || "Hoa").replace(/\s+/g, "-")}.png`;
+      link.download = `Visa-Vinh-Danh-${(name || "HocSinh").replace(/\s+/g, "-")}.png`;
       link.click();
       setDone(true);
       setTimeout(() => setDone(false), 3000);
@@ -766,7 +753,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
     } finally {
       setDownloading(false);
     }
-  }, [studentData, downloading]);
+  }, [name, avatarUrl, downloading]);
 
   return (
     <motion.div
@@ -843,23 +830,23 @@ function Stage4HonorVisaCard({ student, onRestart }) {
           <motion.div variants={itemVariants} className="relative">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-rose-500 p-1 bg-white shadow-lg mx-auto overflow-hidden shrink-0">
               <img
-                src={studentData.avatar_url || FALLBACK.avatar_url}
-                alt={studentData.name}
+                src={avatarUrl}
+                alt={name}
                 className="w-full h-full object-cover rounded-xl"
                 crossOrigin="anonymous"
                 onError={e => {
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentData.name || "Hoa")}&background=e11d48&color=fff&size=256`;
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
                 }}
               />
             </div>
           </motion.div>
 
           <motion.h2 variants={itemVariants} className="text-lg sm:text-xl font-black text-slate-900 leading-tight drop-shadow-xs mt-0.5">
-            {studentData.name || FALLBACK.name}
+            {name}
           </motion.h2>
 
           <motion.div variants={itemVariants} className="bg-rose-100 border border-rose-300 rounded-full px-3 py-0.5 text-[10px] font-extrabold tracking-wider uppercase text-rose-800 shrink-0 shadow-xs">
-            {studentData.vibe || studentData.title || FALLBACK.vibe}
+            Năng Động & Tỏa Sáng ✨
           </motion.div>
 
           <motion.div variants={itemVariants} className="bg-rose-50/95 border border-rose-200 rounded-xl p-2 max-w-[240px] w-full text-center mt-0.5 shadow-sm">
@@ -867,7 +854,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
               <span>💌</span> LỜI CHÚC TỪ TẬP THỂ
             </p>
             <p className="text-[10px] text-slate-700 font-medium leading-relaxed italic line-clamp-2">
-              "{studentData.wish || wishesList[0]?.text || studentData.quote || FALLBACK.wish || FALLBACK.quote}"
+              "{wish}"
             </p>
           </motion.div>
         </div>
@@ -959,28 +946,35 @@ export default function App() {
   useEffect(() => {
     async function fetchStudent() {
       const params = new URLSearchParams(window.location.search);
-      const rawId = params.get("id");
-      const id = rawId && rawId.trim() !== "" ? rawId.trim() : "1";
+      const studentId = params.get("id") || "1";
 
       if (supabase) {
         try {
-          const { data, error } = await supabase
+          // Attempt 1: Query by specific ID (trying string or numeric match)
+          let { data, error } = await supabase
             .from("students")
             .select("name, avatar_url, wish")
-            .eq("id", id)
+            .eq("id", studentId)
             .single();
 
-          if (!error && data) {
-            setStudent({ ...FALLBACK, ...data });
-            setLoading(false);
-            return;
+          if (error || !data) {
+            // Fallback: If querying by exact studentId fails, fetch the first row in the table
+            const fallbackQuery = await supabase
+              .from("students")
+              .select("name, avatar_url, wish")
+              .limit(1)
+              .maybeSingle();
+
+            data = fallbackQuery.data;
           }
-        } catch {
-          // fallback on error
+
+          if (data) {
+            setStudent(data);
+          }
+        } catch (err) {
+          console.error("Fetch student error:", err);
         }
       }
-
-      setStudent({ ...FALLBACK });
       setLoading(false);
     }
 
