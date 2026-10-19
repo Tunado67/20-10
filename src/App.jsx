@@ -14,6 +14,7 @@ const FALLBACK = {
   title: "Đoá Hoa Rực Rỡ 🌸",
   vibe: "Năng Động & Tỏa Sáng ✨",
   stickers: ["🌸", "✨", "👑", "💖", "🎓", "🌺"],
+  wish: "Mong bạn luôn xinh đẹp, tự tin và là phiên bản rực rỡ nhất của chính mình!",
   quote: "Mong bạn luôn xinh đẹp, tự tin và là phiên bản rực rỡ nhất của chính mình!",
   avatar_url: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop&q=80",
   wishes: [
@@ -533,9 +534,9 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
   const name = student?.name || FALLBACK.name;
-  const rawWish = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
+  const rawWish = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.wish || FALLBACK.quote;
   const wish = typeof rawWish === "string" ? rawWish.normalize("NFC") : rawWish;
-  const fullText = "Thân gửi " + name + "\n\n" + wish + "\n\nTừ tập thể lớp 12¹";
+  const fullText = `Thân gửi ${name}\n\n${wish}\n\nTừ tập thể lớp \n12¹`;
 
   const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
@@ -866,7 +867,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
               <span>💌</span> LỜI CHÚC TỪ TẬP THỂ
             </p>
             <p className="text-[10px] text-slate-700 font-medium leading-relaxed italic line-clamp-2">
-              "{wishesList[0]?.text || studentData.quote || FALLBACK.quote}"
+              "{studentData.wish || wishesList[0]?.text || studentData.quote || FALLBACK.wish || FALLBACK.quote}"
             </p>
           </motion.div>
         </div>
@@ -964,7 +965,7 @@ export default function App() {
         try {
           const { data, error } = await supabase
             .from("students")
-            .select("*")
+            .select("name, avatar_url, wish")
             .eq("id", id)
             .single();
 
