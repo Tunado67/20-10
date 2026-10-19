@@ -676,7 +676,6 @@ function Stage3GreetingCard({ student, onNextStage }) {
 function Stage4HonorVisaCard({ student, onRestart }) {
   const stickers = DEFAULT_STICKERS;
   const name = student?.name || DEFAULT_NAME;
-  const wish = student?.wish || DEFAULT_WISH;
   const avatarUrl = student?.avatar_url || DEFAULT_AVATAR;
 
   const containerVariants = {
@@ -800,10 +799,10 @@ function Stage4HonorVisaCard({ student, onRestart }) {
 
           <motion.div variants={itemVariants} className="bg-rose-50/95 border border-rose-200 rounded-xl p-2 max-w-[240px] w-full text-center mt-0.5 shadow-sm">
             <p className="text-[9px] uppercase font-black text-rose-700 tracking-wider mb-0.5 flex items-center justify-center gap-1">
-              <span>💌</span> LỜI CHÚC TỪ TẬP THỂ
+              <span>✨</span> LỜI CHÚC TỪ TẬP THỂ ✨
             </p>
             <p className="text-[10px] text-slate-700 font-medium leading-relaxed italic line-clamp-2">
-              "{wish}"
+              "Chúc bạn ngày 20/10 luôn tươi trẻ, tự tin, rạng rỡ và thành công!"
             </p>
           </motion.div>
         </div>
