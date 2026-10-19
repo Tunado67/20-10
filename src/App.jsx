@@ -532,41 +532,50 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
+  const studentName = student?.name || FALLBACK.name;
   const rawWishText = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.quote;
   const wishText = useMemo(() => (typeof rawWishText === "string" ? rawWishText.normalize("NFC") : rawWishText), [rawWishText]);
-  const [displayedText, setDisplayedText] = useState("");
+
+  const headerText = useMemo(() => `Thân gửi ${studentName}`, [studentName]);
+  const sigText = "Từ tập thể lớp 12¹";
+
+  const totalLength = headerText.length + wishText.length + sigText.length;
+
+  const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
 
   const handleOpenCard = () => {
     if (isOpen) return;
+    setTypedCount(0);
+    setTypingComplete(false);
     setIsOpen(true);
   };
 
   useEffect(() => {
     if (!isOpen) return;
     let interval;
-    let index = 0;
-
-    setDisplayedText("");
-    setTypingComplete(false);
+    let current = 0;
 
     const startTimeout = setTimeout(() => {
       interval = setInterval(() => {
-        if (index < wishText.length) {
-          setDisplayedText(wishText.slice(0, index + 1));
-          index++;
-        } else {
+        current++;
+        setTypedCount(current);
+        if (current >= totalLength) {
           setTypingComplete(true);
           clearInterval(interval);
         }
-      }, 75);
+      }, 55);
     }, 400);
 
     return () => {
       clearTimeout(startTimeout);
       if (interval) clearInterval(interval);
     };
-  }, [isOpen, wishText]);
+  }, [isOpen, totalLength]);
+
+  const headerDisplayed = headerText.slice(0, Math.min(typedCount, headerText.length));
+  const bodyDisplayed = wishText.slice(0, Math.max(0, Math.min(typedCount - headerText.length, wishText.length)));
+  const sigDisplayed = sigText.slice(0, Math.max(0, typedCount - headerText.length - wishText.length));
 
   return (
     <motion.div
@@ -592,23 +601,23 @@ function Stage3GreetingCard({ student, onNextStage }) {
             exit={{ scale: 0.9, opacity: 0, transition: { duration: 0.4 } }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             onClick={handleOpenCard}
-            className="w-full h-72 rounded-3xl bg-gradient-to-br from-rose-900/90 via-purple-900/90 to-slate-900/90 border-2 border-pink-400/40 p-6 shadow-2xl flex flex-col items-center justify-between relative cursor-pointer group overflow-hidden select-none"
+            className="w-full h-72 rounded-3xl bg-slate-50 text-slate-800 border-2 border-slate-200/80 p-6 shadow-2xl flex flex-col items-center justify-between relative cursor-pointer group overflow-hidden select-none"
           >
             <div
-              className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-pink-500/20 to-transparent pointer-events-none"
+              className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-rose-100/60 via-slate-100/40 to-transparent pointer-events-none border-b border-slate-200/50"
               style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
             />
 
-            <div className="absolute top-3 left-4 text-pink-300 text-sm">🌸</div>
-            <div className="absolute top-3 right-4 text-amber-300 text-sm">✨</div>
-            <div className="absolute bottom-3 left-4 text-amber-200 text-sm">✨</div>
-            <div className="absolute bottom-3 right-4 text-pink-300 text-sm">💖</div>
+            <div className="absolute top-3 left-4 text-pink-500 text-sm">🌸</div>
+            <div className="absolute top-3 right-4 text-amber-500 text-sm">✨</div>
+            <div className="absolute bottom-3 left-4 text-amber-500 text-sm">✨</div>
+            <div className="absolute bottom-3 right-4 text-pink-500 text-sm">💖</div>
 
             <div className="text-center pt-3 z-10">
-              <p className="text-xs font-bold text-pink-300 uppercase tracking-widest">
+              <p className="text-xs font-bold text-rose-600 uppercase tracking-widest">
                 GỬI TỚI
               </p>
-              <h3 className="text-xl font-black text-amber-200 mt-1">
+              <h3 className="text-xl font-black text-slate-900 mt-1">
                 {student?.name || FALLBACK.name}
               </h3>
             </div>
@@ -625,7 +634,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
               </div>
             </motion.div>
 
-            <p className="text-[11px] text-pink-200/80 font-medium tracking-wide pb-1 z-10">
+            <p className="text-[11px] text-slate-500 font-medium tracking-wide pb-1 z-10">
               Chạm vào dấu sáp để mở thiệp ✨
             </p>
           </motion.div>
@@ -634,31 +643,39 @@ function Stage3GreetingCard({ student, onNextStage }) {
             initial={{ y: -50, opacity: 0, scale: 0.9 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full min-h-[310px] rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 shadow-2xl flex flex-col justify-between relative select-none"
+            className="w-full min-h-[310px] rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 sm:p-7 shadow-2xl flex flex-col justify-between relative select-none"
+            style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
           >
-            <div className="flex justify-between items-center border-b border-pink-200 pb-3 mb-3">
-              <span className="text-xs font-bold text-rose-600 tracking-wider">
-                🌸 20/10 SPECIAL WISH
-              </span>
-              <span className="text-[10px] bg-rose-100 text-rose-700 font-extrabold px-2 py-0.5 rounded-full border border-rose-300">
-                FOR YOU
-              </span>
-            </div>
-
-            <div className="my-auto py-2">
-              <p
-                className="text-sm sm:text-base font-semibold leading-relaxed text-slate-800 italic min-h-[80px]"
-                style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
-              >
-                {displayedText}
-                {!typingComplete && <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>}
+            <div className="my-auto py-2 flex flex-col justify-between h-full">
+              {/* Header Line */}
+              <p className="text-lg sm:text-xl font-extrabold text-slate-900 mb-4 not-italic">
+                {headerDisplayed}
+                {typedCount <= headerText.length && !typingComplete && (
+                  <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
+                )}
               </p>
-            </div>
 
-            <div className="pt-3 border-t border-pink-200 text-right">
-              <p className="text-xs font-bold text-rose-700">
-                — With Love & Admiration 💖
-              </p>
+              {/* Body Content */}
+              {typedCount > headerText.length && (
+                <p className="text-sm sm:text-base font-medium leading-relaxed text-slate-800 italic my-2">
+                  {bodyDisplayed}
+                  {typedCount > headerText.length &&
+                    typedCount <= headerText.length + wishText.length &&
+                    !typingComplete && (
+                      <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
+                    )}
+                </p>
+              )}
+
+              {/* Signature Line */}
+              {typedCount > headerText.length + wishText.length && (
+                <p className="text-right mt-6 text-sm sm:text-base font-bold text-rose-700 not-italic">
+                  {sigDisplayed}
+                  {!typingComplete && (
+                    <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
+                  )}
+                </p>
+              )}
             </div>
           </motion.div>
         )}
