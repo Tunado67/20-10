@@ -947,53 +947,50 @@ export default function App() {
   const [currentStage, setCurrentStage] = useState(1);
 
   useEffect(() => {
-    async function fetchStudent() {
-      const params = new URLSearchParams(window.location.search);
-      const studentId = params.get('id');
+    let isMounted = true;
+    const fetchStudentData = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const studentId = params.get('id') || '1';
 
-      if (supabase) {
-        try {
-          let studentData = null;
-
-          if (studentId) {
-            const { data, error } = await supabase.from('students').select('*').eq('id', studentId);
-            console.log("Query ID:", studentId, "Data:", data, "Error:\n", error);
-
-            if (data && data.length > 0) {
-              studentData = data[0];
-              setStudent(studentData);
-            }
-          } else {
-            console.warn("No 'id' query parameter found in URL. Fetching first student record as fallback.");
-          }
-
-          if (!studentData) {
-            if (studentId) {
-              console.warn(`No student found with ID '${studentId}'. Fetching first student record as fallback.`);
-            }
-            const { data, error } = await supabase
-              .from('students')
-              .select('*')
-              .limit(1)
-              .maybeSingle();
-
-            if (error) {
-              console.error("Error fetching fallback student record:", error);
-            }
-            if (data) {
-              setStudent(data);
-            }
-          }
-        } catch (err) {
-          console.error("Fetch student error:", err);
+        if (!supabase) {
+          console.error("Supabase client is not initialized!");
+          if (isMounted) setLoading(false);
+          return;
         }
-      } else {
-        console.warn("Supabase client is not initialized.");
-      }
-      setLoading(false);
-    }
 
-    fetchStudent();
+        const { data, error } = await supabase
+          .from('students')
+          .select('name, wish, avatar_url, title')
+          .eq('id', String(studentId))
+          .maybeSingle();
+
+        if (error) console.error("Supabase error:", error.message);
+
+        if (isMounted) {
+          if (data) {
+            setStudent(data);
+          } else {
+            // Safe default fallback object to prevent UI crash
+            setStudent({
+              name: "Bạn",
+              wish: "Chúc bạn luôn tươi trẻ, rạng rỡ, tự tin và thành công!",
+              avatar_url: ""
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Unexpected fetch error:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchStudentData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleNextStage = () => {
@@ -1004,54 +1001,39 @@ export default function App() {
     setCurrentStage(1);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center font-sans">
+        Đang tải thiệp...
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-sm sm:max-w-md h-dvh mx-auto relative overflow-hidden bg-slate-950 text-white font-sans flex flex-col justify-between">
       <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950"
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-              className="text-4xl"
-            >
-              🌹
-            </motion.div>
-            <p className="text-pink-200/80 text-xs font-medium tracking-wide">
-              Đang mở bảo tàng hoa hồng…
-            </p>
-          </motion.div>
-        ) : (
-          <>
-            {currentStage === 1 && (
-              <Stage1EnchantedRose onRoseTap={handleNextStage} />
-            )}
+        {currentStage === 1 && (
+          <Stage1EnchantedRose onRoseTap={handleNextStage} />
+        )}
 
-            {currentStage === 2 && (
-              <Stage2SequentialMessagesAndBouquet
-                onNextStage={handleNextStage}
-              />
-            )}
+        {currentStage === 2 && (
+          <Stage2SequentialMessagesAndBouquet
+            onNextStage={handleNextStage}
+          />
+        )}
 
-            {currentStage === 3 && (
-              <Stage3GreetingCard
-                student={student}
-                onNextStage={handleNextStage}
-              />
-            )}
+        {currentStage === 3 && (
+          <Stage3GreetingCard
+            student={student}
+            onNextStage={handleNextStage}
+          />
+        )}
 
-            {currentStage === 4 && (
-              <Stage4HonorVisaCard
-                student={student}
-                onRestart={handleRestart}
-              />
-            )}
-          </>
+        {currentStage === 4 && (
+          <Stage4HonorVisaCard
+            student={student}
+            onRestart={handleRestart}
+          />
         )}
       </AnimatePresence>
     </div>
