@@ -536,7 +536,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
   const name = student?.name || FALLBACK.name;
   const rawWish = student?.wish || student?.quote || student?.wishes?.[0]?.text || FALLBACK.wish || FALLBACK.quote;
   const wish = typeof rawWish === "string" ? rawWish.normalize("NFC") : rawWish;
-  const fullText = `Thân gửi ${name}\n\n${wish}\n\nTừ tập thể lớp \n12¹`;
+  const fullText = `Thân gửi ${name}\n\n${wish}\n\nTừ tập thể lớp 12¹`;
 
   const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
@@ -605,7 +605,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
                 GỬI TỚI
               </p>
               <h3 className="text-xl font-black text-slate-900 mt-1">
-                {student?.name || FALLBACK.name}
+                {name}
               </h3>
             </div>
 
@@ -959,7 +959,8 @@ export default function App() {
   useEffect(() => {
     async function fetchStudent() {
       const params = new URLSearchParams(window.location.search);
-      const id = params.get("id") || "demo";
+      const rawId = params.get("id");
+      const id = rawId && rawId.trim() !== "" ? rawId.trim() : "1";
 
       if (supabase) {
         try {
