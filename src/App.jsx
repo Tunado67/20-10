@@ -28,6 +28,9 @@ const DEFAULT_NAME = "Bạn";
 const DEFAULT_WISH = "Chúc bạn luôn tươi trẻ, rạng rỡ, tự tin và thành công trên con đường đã chọn!";
 const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256' viewBox='0 0 256 256'><rect width='100%' height='100%' fill='%23e11d48'/><text x='50%' y='55%' dominant-baseline='central' text-anchor='middle' fill='%23ffffff' font-size='110' font-family='sans-serif'>👩</text></svg>";
 
+const TARGET_VOLUME = 0.25;
+const FADE_DURATION = 1.5; // seconds
+
 const DEFAULT_STICKERS = ["🌸", "✨", "👑", "💖", "🎓", "🌺"];
 
 const SEQUENTIAL_MESSAGES = [
@@ -867,7 +870,7 @@ export default function App() {
 
   const setAudioVolume = () => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.25;
+      audioRef.current.volume = TARGET_VOLUME;
     }
   };
 
@@ -900,6 +903,54 @@ export default function App() {
   useEffect(() => {
     setAudioVolume();
   }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    let fadeInInterval = null;
+
+    const handleTimeUpdate = () => {
+      if (!isPlaying) return;
+
+      const timeRemaining = audio.duration - audio.currentTime;
+
+      // Trigger Fade-Out near the end of track
+      if (timeRemaining <= FADE_DURATION && audio.volume > 0.02) {
+        audio.volume = Math.max(0, audio.volume - 0.02);
+      }
+    };
+
+    const handleEnded = () => {
+      if (isPlaying) {
+        audio.currentTime = 0;
+        audio.volume = 0;
+        audio.play().catch(() => {});
+
+        // Smooth Fade-In on restart
+        let vol = 0;
+        if (fadeInInterval) clearInterval(fadeInInterval);
+        fadeInInterval = setInterval(() => {
+          if (vol < TARGET_VOLUME) {
+            vol = Math.min(TARGET_VOLUME, vol + 0.02);
+            audio.volume = vol;
+          } else {
+            clearInterval(fadeInInterval);
+            fadeInInterval = null;
+          }
+        }, 100);
+      }
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      if (fadeInInterval) clearInterval(fadeInInterval);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [isPlaying]);
 
   useEffect(() => {
     let isMounted = true;
@@ -965,7 +1016,6 @@ export default function App() {
       <audio
         ref={audioRef}
         src={bgMusic}
-        loop={true}
         preload="auto"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
