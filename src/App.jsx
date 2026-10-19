@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+import { Volume2, VolumeX } from "lucide-react";
 import bgImage from "./assets/IMG_20261018_222005.jpg";
+import bgMusic from "./assets/background-music.mp3";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
@@ -859,6 +861,37 @@ export default function App() {
   const [student, setStudent] = useState(DEFAULT_STUDENT);
   const [isLoading, setIsLoading] = useState(true);
   const [currentStage, setCurrentStage] = useState(1);
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const toggleAudio = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(err => {
+        console.log("Audio play failed:", err);
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (audioRef.current && audioRef.current.paused) {
+        audioRef.current.play().catch(err => {
+          console.log("Autoplay on first interaction prevented or failed:", err);
+        });
+      }
+    };
+
+    window.addEventListener("pointerdown", handleFirstInteraction, { once: true });
+    window.addEventListener("keydown", handleFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -919,44 +952,66 @@ export default function App() {
     setCurrentStage(1);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-rose-300 flex items-center justify-center font-sans">
-        <div className="animate-pulse flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-rose-400 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-medium">Đang tải thiệp chúc mừng...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full max-w-sm sm:max-w-md h-dvh mx-auto relative overflow-hidden bg-slate-950 text-white font-sans flex flex-col justify-between">
-      <AnimatePresence mode="wait">
-        {currentStage === 1 && (
-          <Stage1EnchantedRose onRoseTap={handleNextStage} />
-        )}
+      <audio
+        ref={audioRef}
+        src={bgMusic}
+        loop={true}
+        preload="auto"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
 
-        {currentStage === 2 && (
-          <Stage2SequentialMessagesAndBouquet
-            onNextStage={handleNextStage}
-          />
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleAudio();
+        }}
+        aria-label={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
+        className="fixed top-4 right-4 z-50 p-2.5 rounded-full bg-slate-900/60 backdrop-blur-md border border-white/20 text-white shadow-lg hover:bg-slate-800/80 transition-all cursor-pointer flex items-center justify-center active:scale-95"
+      >
+        {isPlaying ? (
+          <Volume2 className="w-5 h-5 text-pink-300 animate-pulse" />
+        ) : (
+          <VolumeX className="w-5 h-5 text-slate-400" />
         )}
+      </button>
 
-        {currentStage === 3 && (
-          <Stage3GreetingCard
-            student={student}
-            onNextStage={handleNextStage}
-          />
-        )}
+      {isLoading ? (
+        <div className="min-h-screen bg-slate-950 text-rose-300 flex items-center justify-center font-sans">
+          <div className="animate-pulse flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-rose-400 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-medium">Đang tải thiệp chúc mừng...</p>
+          </div>
+        </div>
+      ) : (
+        <AnimatePresence mode="wait">
+          {currentStage === 1 && (
+            <Stage1EnchantedRose onRoseTap={handleNextStage} />
+          )}
 
-        {currentStage === 4 && (
-          <Stage4HonorVisaCard
-            student={student}
-            onRestart={handleRestart}
-          />
-        )}
-      </AnimatePresence>
+          {currentStage === 2 && (
+            <Stage2SequentialMessagesAndBouquet
+              onNextStage={handleNextStage}
+            />
+          )}
+
+          {currentStage === 3 && (
+            <Stage3GreetingCard
+              student={student}
+              onNextStage={handleNextStage}
+            />
+          )}
+
+          {currentStage === 4 && (
+            <Stage4HonorVisaCard
+              student={student}
+              onRestart={handleRestart}
+            />
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 }
