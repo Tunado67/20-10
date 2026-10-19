@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
-import html2canvas from "html2canvas";
 import confetti from "canvas-confetti";
 import bgImage from "./assets/IMG_20261018_222005.jpg";
 
@@ -534,7 +533,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
   const name = student?.name || DEFAULT_NAME;
   const wish = (student?.wish || DEFAULT_WISH).normalize("NFC");
-  const fullText = `Thân gửi ${name}\n\n${wish}\n\nTừ tập thể lớp 12¹`;
+  const fullText = `Thân gửi ${name}\n\n${wish}`;
 
   const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
@@ -675,10 +674,6 @@ function Stage3GreetingCard({ student, onNextStage }) {
 // STAGE 4: Honor Visa Card
 // ─────────────────────────────────────────────
 function Stage4HonorVisaCard({ student, onRestart }) {
-  const cardRef = useRef(null);
-  const [downloading, setDownloading] = useState(false);
-  const [done, setDone] = useState(false);
-
   const stickers = DEFAULT_STICKERS;
   const name = student?.name || DEFAULT_NAME;
   const wish = student?.wish || DEFAULT_WISH;
@@ -711,65 +706,6 @@ function Stage4HonorVisaCard({ student, onRestart }) {
     },
   };
 
-  const handleDownload = useCallback(async () => {
-    if (!cardRef.current || downloading) return;
-    setDownloading(true);
-
-    try {
-      let avatarSrc = avatarUrl;
-      if (avatarUrl) {
-        try {
-          const res = await fetch(avatarUrl);
-          const blob = await res.blob();
-          avatarSrc = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-          });
-        } catch {
-          avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
-        }
-      } else {
-        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
-      }
-
-      const imgEl = cardRef.current.querySelector("img");
-      const originalSrc = imgEl ? imgEl.src : null;
-      if (imgEl) imgEl.src = avatarSrc;
-
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight,
-      });
-
-      if (imgEl && originalSrc) imgEl.src = originalSrc;
-
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = `Visa-Vinh-Danh-${(name || "HocSinh").replace(/\s+/g, "-")}.png`;
-      link.click();
-      setDone(true);
-      setTimeout(() => setDone(false), 3000);
-
-      confetti({
-        particleCount: 110,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ["#f43f5e", "#fbbf24", "#ec4899", "#a855f7"],
-      });
-    } catch (err) {
-      console.error("html2canvas download error:", err);
-      alert("Không thể tải ảnh. Vui lòng thử lại!");
-    } finally {
-      setDownloading(false);
-    }
-  }, [name, avatarUrl, downloading]);
-
   return (
     <motion.div
       key="stage-4"
@@ -787,7 +723,6 @@ function Stage4HonorVisaCard({ student, onRestart }) {
       <div className="h-4 shrink-0" />
 
       <motion.div
-        ref={cardRef}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -906,37 +841,6 @@ function Stage4HonorVisaCard({ student, onRestart }) {
       </motion.div>
 
       <div className="w-full max-w-xs flex flex-col gap-2 z-10 pb-2 shrink-0">
-        <motion.button
-          onClick={handleDownload}
-          disabled={downloading}
-          whileTap={{ scale: 0.95 }}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs text-white transition-all cursor-pointer shadow-lg"
-          style={{
-            background: done
-              ? "linear-gradient(135deg, #16a34a, #15803d)"
-              : "linear-gradient(135deg, #e11d48, #be123c)",
-            opacity: downloading ? 0.7 : 1,
-          }}
-        >
-          {downloading ? (
-            <>
-              <motion.span
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-              >
-                ⏳
-              </motion.span>
-              Đang tạo Visa Vinh Danh…
-            </>
-          ) : done ? (
-            <>✅ Đã tải Visa Vinh Danh (.png)!</>
-          ) : (
-            <>
-              📥 Tải ảnh Visa Vinh Danh (.png)
-            </>
-          )}
-        </motion.button>
-
         <motion.button
           onClick={onRestart}
           whileTap={{ scale: 0.95 }}
