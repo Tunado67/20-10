@@ -948,23 +948,51 @@ export default function App() {
 
   useEffect(() => {
     async function fetchStudent() {
-      const params = new URLSearchParams(window.location.search);
-      const studentId = params.get("id") || "1";
+      const id = new URLSearchParams(window.location.search).get("id");
 
       if (supabase) {
         try {
-          const { data, error } = await supabase
-            .from("students")
-            .select("name, wish, avatar_url, title")
-            .eq("id", studentId)
-            .maybeSingle();
+          let studentData = null;
 
-          if (data) {
-            setStudent(data);
+          if (id) {
+            const { data, error } = await supabase
+              .from("students")
+              .select("name, wish, avatar_url, title")
+              .eq("id", id)
+              .maybeSingle();
+
+            if (error) {
+              console.error("Error fetching student by ID:", error);
+            }
+            studentData = data;
+          } else {
+            console.warn("No 'id' query parameter found in URL. Fetching first student record as fallback.");
+          }
+
+          if (!studentData) {
+            if (id) {
+              console.warn(`No student found with ID '${id}'. Fetching first student record as fallback.`);
+            }
+            const { data, error } = await supabase
+              .from("students")
+              .select("name, wish, avatar_url, title")
+              .limit(1)
+              .maybeSingle();
+
+            if (error) {
+              console.error("Error fetching fallback student record:", error);
+            }
+            studentData = data;
+          }
+
+          if (studentData) {
+            setStudent(studentData);
           }
         } catch (err) {
           console.error("Fetch student error:", err);
         }
+      } else {
+        console.warn("Supabase client is not initialized.");
       }
       setLoading(false);
     }
