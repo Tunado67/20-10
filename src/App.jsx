@@ -8,6 +8,10 @@ import bgImage from "./assets/IMG_20261018_222005.jpg";
 // ─────────────────────────────────────────────
 // Constants & Sequential Messages
 // ─────────────────────────────────────────────
+const DEFAULT_NAME = "Bạn";
+const DEFAULT_WISH = "Chúc bạn luôn tươi trẻ, rạng rỡ, tự tin và thành công trên con đường đã chọn!";
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256' viewBox='0 0 256 256'><rect width='100%' height='100%' fill='%23e11d48'/><text x='50%' y='55%' dominant-baseline='central' text-anchor='middle' fill='%23ffffff' font-size='110' font-family='sans-serif'>👩</text></svg>";
+
 const DEFAULT_STICKERS = ["🌸", "✨", "👑", "💖", "🎓", "🌺"];
 
 const SEQUENTIAL_MESSAGES = [
@@ -517,9 +521,9 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
-  const name = student?.name || "";
-  const wish = student?.wish ? student.wish.normalize("NFC") : "";
-  const fullText = "Thân gửi " + name + "\n\n" + wish + "\n\nTừ tập thể lớp 12¹";
+  const name = student?.name || DEFAULT_NAME;
+  const wish = (student?.wish || DEFAULT_WISH).normalize("NFC");
+  const fullText = `Thân gửi ${name}\n\n${wish}\n\nTừ tập thể lớp 12¹`;
 
   const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
@@ -665,9 +669,9 @@ function Stage4HonorVisaCard({ student, onRestart }) {
   const [done, setDone] = useState(false);
 
   const stickers = DEFAULT_STICKERS;
-  const name = student?.name || "";
-  const wish = student?.wish || "";
-  const avatarUrl = student?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
+  const name = student?.name || DEFAULT_NAME;
+  const wish = student?.wish || DEFAULT_WISH;
+  const avatarUrl = student?.avatar_url || DEFAULT_AVATAR;
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.92 },
@@ -833,9 +837,8 @@ function Stage4HonorVisaCard({ student, onRestart }) {
                 src={avatarUrl}
                 alt={name}
                 className="w-full h-full object-cover rounded-xl"
-                crossOrigin="anonymous"
                 onError={e => {
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "HocSinh")}&background=e11d48&color=fff&size=256`;
+                  e.currentTarget.src = DEFAULT_AVATAR;
                 }}
               />
             </div>
@@ -950,23 +953,11 @@ export default function App() {
 
       if (supabase) {
         try {
-          // Attempt 1: Query by specific ID (trying string or numeric match)
-          let { data, error } = await supabase
+          const { data, error } = await supabase
             .from("students")
-            .select("name, avatar_url, wish")
+            .select("name, wish, avatar_url, title")
             .eq("id", studentId)
-            .single();
-
-          if (error || !data) {
-            // Fallback: If querying by exact studentId fails, fetch the first row in the table
-            const fallbackQuery = await supabase
-              .from("students")
-              .select("name, avatar_url, wish")
-              .limit(1)
-              .maybeSingle();
-
-            data = fallbackQuery.data;
-          }
+            .maybeSingle();
 
           if (data) {
             setStudent(data);
