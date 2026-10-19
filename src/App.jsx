@@ -1,9 +1,24 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { supabase } from "./supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
 import html2canvas from "html2canvas";
 import confetti from "canvas-confetti";
 import bgImage from "./assets/IMG_20261018_222005.jpg";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+
+const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
+const DEFAULT_STUDENT = {
+  id: "1",
+  name: "Bạn",
+  wish: "Chúc bạn luôn tươi trẻ, rạng rỡ, tự tin và thành công trên con đường đã chọn!",
+  avatar_url: "",
+  title: "NĂNG ĐỘNG & TỎA SÁNG"
+};
 
 // ─────────────────────────────────────────────
 // Constants & Sequential Messages
@@ -63,10 +78,6 @@ function AmbientParticles() {
 
 // ─────────────────────────────────────────────
 // STAGE 1: Enchanted Glass Rose (Press & Hold to Unlock)
-// Completely clean UI without headers.
-// Floating particles significantly reduced.
-// Press & hold interaction for 1.5s gradually intensifies inner glow.
-// Once unlocked, reveals prompt "Nhấn vào để mở ✨".
 // ─────────────────────────────────────────────
 function Stage1EnchantedRose({ onRoseTap }) {
   const [holdProgress, setHoldProgress] = useState(0); // 0 to 1
@@ -849,7 +860,7 @@ function Stage4HonorVisaCard({ student, onRestart }) {
           </motion.h2>
 
           <motion.div variants={itemVariants} className="bg-rose-100 border border-rose-300 rounded-full px-3 py-0.5 text-[10px] font-extrabold tracking-wider uppercase text-rose-800 shrink-0 shadow-xs">
-            Năng Động & Tỏa Sáng ✨
+            {student?.title || "NĂNG ĐỘNG & TỎA SÁNG"} ✨
           </motion.div>
 
           <motion.div variants={itemVariants} className="bg-rose-50/95 border border-rose-200 rounded-xl p-2 max-w-[240px] w-full text-center mt-0.5 shadow-sm">
@@ -942,55 +953,59 @@ function Stage4HonorVisaCard({ student, onRestart }) {
 // MAIN APP COMPONENT
 // ─────────────────────────────────────────────
 export default function App() {
-  const [student, setStudent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [student, setStudent] = useState(DEFAULT_STUDENT);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentStage, setCurrentStage] = useState(1);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchStudentData = async () => {
+
+    async function loadStudentData() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const studentId = params.get('id') || '1';
+        const urlId = params.get('id') || '1';
+
+        console.log("[DEBUG] Extracted URL id:", urlId);
 
         if (!supabase) {
-          console.error("Supabase client is not initialized!");
-          if (isMounted) setLoading(false);
+          console.warn("[DEBUG] Supabase client missing env vars, using fallback.");
+          if (isMounted) setIsLoading(false);
           return;
         }
 
         const { data, error } = await supabase
           .from('students')
-          .select('name, wish, avatar_url, title')
-          .eq('id', String(studentId))
+          .select('id, name, wish, avatar_url, title')
+          .eq('id', String(urlId))
           .maybeSingle();
 
-        if (error) console.error("Supabase error:", error.message);
+        if (error) {
+          console.error("[DEBUG] Supabase query error:", error.message);
+        }
 
         if (isMounted) {
           if (data) {
-            setStudent(data);
-          } else {
-            // Safe default fallback object to prevent UI crash
+            console.log("[DEBUG] Successfully fetched student:", data);
             setStudent({
-              name: "Bạn",
-              wish: "Chúc bạn luôn tươi trẻ, rạng rỡ, tự tin và thành công!",
-              avatar_url: ""
+              ...DEFAULT_STUDENT,
+              ...data,
+              name: data.name || DEFAULT_STUDENT.name,
+              wish: data.wish || DEFAULT_STUDENT.wish
             });
+          } else {
+            console.warn("[DEBUG] No student found for ID:", urlId);
           }
         }
       } catch (err) {
-        console.error("Unexpected fetch error:", err);
+        console.error("[DEBUG] Unexpected runtime error during fetch:", err);
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) setIsLoading(false);
       }
-    };
+    }
 
-    fetchStudentData();
+    loadStudentData();
 
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   const handleNextStage = () => {
@@ -1001,10 +1016,13 @@ export default function App() {
     setCurrentStage(1);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center font-sans">
-        Đang tải thiệp...
+      <div className="min-h-screen bg-slate-950 text-rose-300 flex items-center justify-center font-sans">
+        <div className="animate-pulse flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-rose-400 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium">Đang tải thiệp chúc mừng...</p>
+        </div>
       </div>
     );
   }
