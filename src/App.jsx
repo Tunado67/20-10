@@ -537,9 +537,11 @@ function Stage3GreetingCard({ student, onNextStage }) {
   const wishText = useMemo(() => (typeof rawWishText === "string" ? rawWishText.normalize("NFC") : rawWishText), [rawWishText]);
 
   const headerText = useMemo(() => `Thân gửi ${studentName}`, [studentName]);
-  const sigText = "Từ tập thể lớp 12¹";
 
-  const totalLength = headerText.length + wishText.length + sigText.length;
+  const fullText = useMemo(
+    () => `Thân gửi ${studentName}\n\n${wishText}\n\nTừ tập thể lớp 12¹`,
+    [studentName, wishText]
+  );
 
   const [typedCount, setTypedCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
@@ -560,7 +562,7 @@ function Stage3GreetingCard({ student, onNextStage }) {
       interval = setInterval(() => {
         current++;
         setTypedCount(current);
-        if (current >= totalLength) {
+        if (current >= fullText.length) {
           setTypingComplete(true);
           clearInterval(interval);
         }
@@ -571,11 +573,16 @@ function Stage3GreetingCard({ student, onNextStage }) {
       clearTimeout(startTimeout);
       if (interval) clearInterval(interval);
     };
-  }, [isOpen, totalLength]);
+  }, [isOpen, fullText.length]);
 
-  const headerDisplayed = headerText.slice(0, Math.min(typedCount, headerText.length));
-  const bodyDisplayed = wishText.slice(0, Math.max(0, Math.min(typedCount - headerText.length, wishText.length)));
-  const sigDisplayed = sigText.slice(0, Math.max(0, typedCount - headerText.length - wishText.length));
+  const headerEnd = headerText.length;
+  const bodyStart = headerEnd + 2;
+  const bodyEnd = bodyStart + wishText.length;
+  const sigStart = bodyEnd + 2;
+
+  const headerDisplayed = fullText.slice(0, Math.min(typedCount, headerEnd));
+  const bodyDisplayed = typedCount > headerEnd ? fullText.slice(bodyStart, Math.min(typedCount, bodyEnd)) : "";
+  const sigDisplayed = typedCount > bodyEnd ? fullText.slice(sigStart, Math.min(typedCount, fullText.length)) : "";
 
   return (
     <motion.div
@@ -650,28 +657,24 @@ function Stage3GreetingCard({ student, onNextStage }) {
               {/* Header Line */}
               <p className="text-lg sm:text-xl font-extrabold text-slate-900 mb-4 not-italic">
                 {headerDisplayed}
-                {typedCount <= headerText.length && !typingComplete && (
+                {typedCount < bodyStart && !typingComplete && (
                   <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
                 )}
               </p>
 
               {/* Body Content */}
-              {typedCount > headerText.length && (
-                <p className="text-sm sm:text-base font-medium leading-relaxed text-slate-800 italic my-2">
-                  {bodyDisplayed}
-                  {typedCount > headerText.length &&
-                    typedCount <= headerText.length + wishText.length &&
-                    !typingComplete && (
-                      <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
-                    )}
-                </p>
-              )}
+              <p className="text-sm sm:text-base font-medium leading-relaxed text-slate-800 italic my-2">
+                {bodyDisplayed}
+                {typedCount >= bodyStart && typedCount < sigStart && !typingComplete && (
+                  <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
+                )}
+              </p>
 
               {/* Signature Line */}
-              {typedCount > headerText.length + wishText.length && (
+              {typedCount > bodyEnd && (
                 <p className="text-right mt-6 text-sm sm:text-base font-bold text-rose-700 not-italic">
                   {sigDisplayed}
-                  {!typingComplete && (
+                  {typedCount >= sigStart && !typingComplete && (
                     <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
                   )}
                 </p>
