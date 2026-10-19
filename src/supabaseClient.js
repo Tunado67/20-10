@@ -1,13 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const url = import.meta.env.VITE_SUPABASE_URL ?? '';
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Only instantiate when both env vars look like real values.
-// A missing/placeholder config would crash createClient() with a cryptic error.
-const isReady =
-  url.startsWith('http') &&
-  key.length > 20;
+const maskedUrl = supabaseUrl ? `${supabaseUrl.slice(0, 15)}...` : import.meta.env.VITE_SUPABASE_URL;
 
-/** Supabase client, or `null` when config is absent → app uses fallback data */
-export const supabase = isReady ? createClient(url, key) : null;
+console.log("Supabase Client initialized with URL:", maskedUrl);
+
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;

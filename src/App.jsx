@@ -950,23 +950,18 @@ export default function App() {
     async function fetchStudent() {
       const params = new URLSearchParams(window.location.search);
       const studentId = params.get('id');
-      console.log("Extracted Student ID from URL:", studentId);
 
       if (supabase) {
         try {
           let studentData = null;
 
           if (studentId) {
-            const { data, error } = await supabase
-              .from('students')
-              .select('name, wish, avatar_url, title')
-              .eq('id', String(studentId))
-              .maybeSingle();
+            const { data, error } = await supabase.from('students').select('*').eq('id', studentId);
+            console.log("Query ID:", studentId, "Data:", data, "Error:\n", error);
 
-            console.log("Supabase Fetch Result:", { data, error });
-            if (data) {
-              studentData = data;
-              setStudent(data);
+            if (data && data.length > 0) {
+              studentData = data[0];
+              setStudent(studentData);
             }
           } else {
             console.warn("No 'id' query parameter found in URL. Fetching first student record as fallback.");
@@ -978,7 +973,7 @@ export default function App() {
             }
             const { data, error } = await supabase
               .from('students')
-              .select('name, wish, avatar_url, title')
+              .select('*')
               .limit(1)
               .maybeSingle();
 
