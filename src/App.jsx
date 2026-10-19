@@ -948,45 +948,46 @@ export default function App() {
 
   useEffect(() => {
     async function fetchStudent() {
-      const id = new URLSearchParams(window.location.search).get("id");
+      const params = new URLSearchParams(window.location.search);
+      const studentId = params.get('id');
+      console.log("Extracted Student ID from URL:", studentId);
 
       if (supabase) {
         try {
           let studentData = null;
 
-          if (id) {
+          if (studentId) {
             const { data, error } = await supabase
-              .from("students")
-              .select("name, wish, avatar_url, title")
-              .eq("id", id)
+              .from('students')
+              .select('name, wish, avatar_url, title')
+              .eq('id', String(studentId))
               .maybeSingle();
 
-            if (error) {
-              console.error("Error fetching student by ID:", error);
+            console.log("Supabase Fetch Result:", { data, error });
+            if (data) {
+              studentData = data;
+              setStudent(data);
             }
-            studentData = data;
           } else {
             console.warn("No 'id' query parameter found in URL. Fetching first student record as fallback.");
           }
 
           if (!studentData) {
-            if (id) {
-              console.warn(`No student found with ID '${id}'. Fetching first student record as fallback.`);
+            if (studentId) {
+              console.warn(`No student found with ID '${studentId}'. Fetching first student record as fallback.`);
             }
             const { data, error } = await supabase
-              .from("students")
-              .select("name, wish, avatar_url, title")
+              .from('students')
+              .select('name, wish, avatar_url, title')
               .limit(1)
               .maybeSingle();
 
             if (error) {
               console.error("Error fetching fallback student record:", error);
             }
-            studentData = data;
-          }
-
-          if (studentData) {
-            setStudent(studentData);
+            if (data) {
+              setStudent(data);
+            }
           }
         } catch (err) {
           console.error("Fetch student error:", err);
