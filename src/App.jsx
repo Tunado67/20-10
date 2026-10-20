@@ -23,7 +23,7 @@ const DEFAULT_STUDENT = {
 
 const DEFAULT_TEACHER = {
   id: "teacher",
-  name: "Cô Giáo Chủ Nhiệm".normalize("NFC"),
+  name: "Giáo Chủ Nhiệm".normalize("NFC"),
   wish: "Kính chúc Cô luôn giữ vững nhiệt huyết, ngọn lửa đam mê với nghề giáo, luôn chan chứa tình yêu thương dành cho thế hệ học trò và gặt hái thật nhiều thành công, hạnh phúc trong cuộc sống!".normalize("NFC"),
   avatar_url: "",
   title: "NGƯỜI LÁI ĐÒ TẬN TỤY".normalize("NFC"),
@@ -55,7 +55,7 @@ const SEQUENTIAL_MESSAGES = [
 ].map(m => m.normalize("NFC"));
 
 // ─────────────────────────────────────────────
-// Floating Ambient Particles Component (Reduced for Elegance)
+// Floating Ambient Particles Component
 // ─────────────────────────────────────────────
 const BACKGROUND_EMOJIS = ["✨", "🌸", "💖", "✨"];
 
@@ -92,6 +92,32 @@ function AmbientParticles() {
       ))}
     </div>
   );
+}
+
+// ─────────────────────────────────────────────
+// Sound Effect Helper
+// ─────────────────────────────────────────────
+function playPaperSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = ctx.sampleRate * 0.15;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200;
+    filter.Q.value = 1.5;
+    noise.connect(filter);
+    filter.connect(ctx.destination);
+    noise.start();
+  } catch (e) {
+    console.log("AudioContext SFX error:", e);
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -872,78 +898,89 @@ function Stage4HonorVisaCard({ student, onRestart }) {
 }
 
 // ─────────────────────────────────────────────
-// Sound Effect Helper
-// ─────────────────────────────────────────────
-function playPaperSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const bufferSize = ctx.sampleRate * 0.15;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
-    }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1200;
-    filter.Q.value = 1.5;
-    noise.connect(filter);
-    filter.connect(ctx.destination);
-    noise.start();
-  } catch (e) {
-    console.log("AudioContext SFX error:", e);
-  }
-}
-
-// ─────────────────────────────────────────────
 // TEACHER FLOW COMPONENTS
 // ─────────────────────────────────────────────
+
+// Stage 1: Interactive Long-Press Flower Bloom Stage
 function TeacherStage1FlowerBloom({ onComplete }) {
-  const [bloomProgress, setBloomProgress] = useState(0);
-  const isCompleteRef = useRef(false);
+  const [holdProgress, setHoldProgress] = useState(0); // 0 to 1
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [flashing, setFlashing] = useState(false);
+  const holdIntervalRef = useRef(null);
+  const holdStartTimeRef = useRef(null);
+
+  const HOLD_DURATION = 1500; // 1.5 seconds required hold time
+
+  const startHolding = useCallback(() => {
+    if (isCompleted) return;
+    holdStartTimeRef.current = Date.now();
+
+    if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+
+    holdIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - holdStartTimeRef.current;
+      const progress = Math.min(1, elapsed / HOLD_DURATION);
+      setHoldProgress(progress);
+
+      if (progress >= 1) {
+        clearInterval(holdIntervalRef.current);
+        holdIntervalRef.current = null;
+        setIsCompleted(true);
+        setFlashing(true);
+        setTimeout(() => {
+          onComplete();
+        }, 500);
+      }
+    }, 30);
+  }, [isCompleted, onComplete]);
+
+  const stopHolding = useCallback(() => {
+    if (holdIntervalRef.current) {
+      clearInterval(holdIntervalRef.current);
+      holdIntervalRef.current = null;
+    }
+    if (!isCompleted) {
+      setHoldProgress(0);
+    }
+  }, [isCompleted]);
 
   useEffect(() => {
-    const duration = 5000;
-    const intervalTime = 50;
-    const increment = 100 / (duration / intervalTime);
+    return () => {
+      if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+    };
+  }, []);
 
-    const timer = setInterval(() => {
-      setBloomProgress(prev => {
-        const next = prev + increment;
-        if (next >= 100) {
-          clearInterval(timer);
-          if (!isCompleteRef.current) {
-            isCompleteRef.current = true;
-            setTimeout(() => {
-              onComplete();
-            }, 600);
-          }
-          return 100;
-        }
-        return next;
-      });
-    }, intervalTime);
-
-    return () => clearInterval(timer);
-  }, [onComplete]);
-
-  const roseScale = 0.5 + (bloomProgress / 100) * 0.6;
-  const petalOpacity = bloomProgress / 100;
+  const flowerScale = 0.8 + holdProgress * 0.35;
 
   return (
     <motion.div
+      key="teacher-stage-1"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-between h-full py-8 px-4 text-center z-10"
+      transition={{ duration: 0.8 }}
+      className="relative flex flex-col items-center justify-between h-full py-8 px-4 text-center z-10 select-none overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bgImage})` }}
     >
-      <div className="pt-4">
+      <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[2px] -z-10" />
+
+      {/* Bloom Flash Overlay when blooming completes */}
+      {flashing && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 0.9] }}
+          transition={{ duration: 0.5 }}
+          className="absolute inset-0 bg-white z-50 pointer-events-none"
+        />
+      )}
+
+      <AmbientParticles />
+
+      <div className="pt-4 z-10 shrink-0">
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="inline-block bg-rose-500/20 border border-rose-400/30 backdrop-blur-md text-rose-200 text-xs px-3 py-1 rounded-full font-medium mb-2"
+          className="inline-block bg-rose-500/20 border border-rose-400/30 backdrop-blur-md text-rose-200 text-xs px-3 py-1 rounded-full font-medium mb-2 shadow-sm"
         >
           ✨ Ngày Phụ Nữ Việt Nam 20/10 ✨
         </motion.div>
@@ -957,168 +994,240 @@ function TeacherStage1FlowerBloom({ onComplete }) {
         </motion.h1>
       </div>
 
-      <div className="relative flex flex-col items-center justify-center my-auto">
-        <motion.div
-          className="relative w-56 h-56 flex items-center justify-center cursor-pointer"
-          onClick={() => {
-            if (!isCompleteRef.current) {
-              setBloomProgress(100);
-            }
+      <div
+        onMouseDown={startHolding}
+        onMouseUp={stopHolding}
+        onMouseLeave={stopHolding}
+        onTouchStart={startHolding}
+        onTouchEnd={stopHolding}
+        onTouchCancel={stopHolding}
+        className="relative flex flex-col items-center justify-center my-auto cursor-pointer touch-none z-10 group"
+      >
+        <div
+          className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-pink-500/30 to-rose-500/40 blur-2xl transition-all duration-150 -z-10"
+          style={{
+            transform: `scale(${1 + holdProgress * 0.4})`,
+            opacity: 0.4 + holdProgress * 0.6,
           }}
-        >
-          <div
-            className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500/20 to-rose-500/30 blur-xl transition-all duration-500"
-            style={{ transform: `scale(${roseScale + 0.2})` }}
-          />
+        />
 
+        <div className="relative w-56 h-56 flex items-center justify-center">
           <motion.div
-            style={{ scale: roseScale }}
-            className="text-8xl filter drop-shadow-[0_0_20px_rgba(244,63,94,0.6)] select-none transition-transform duration-300"
+            style={{ scale: flowerScale }}
+            className="text-8xl sm:text-9xl filter transition-transform duration-75 select-none"
+            animate={{
+              filter: isCompleted
+                ? "drop-shadow(0 0 35px rgba(244, 63, 94, 1))"
+                : `drop-shadow(0 0 ${10 + holdProgress * 25}px rgba(244, 63, 94, ${0.4 + holdProgress * 0.6}))`,
+            }}
           >
             💐
           </motion.div>
 
           <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-700"
-            style={{ opacity: petalOpacity }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300"
+            style={{ opacity: holdProgress }}
           >
             <span className="absolute -top-2 text-3xl animate-bounce">🌸</span>
             <span className="absolute -bottom-2 text-3xl animate-bounce delay-100">🌹</span>
             <span className="absolute -left-2 text-3xl animate-bounce delay-200">🌺</span>
             <span className="absolute -right-2 text-3xl animate-bounce delay-300">🌷</span>
           </div>
-        </motion.div>
-
-        <div className="w-48 bg-slate-800/80 border border-slate-700/60 rounded-full h-2 mt-6 overflow-hidden p-0.5">
-          <div
-            className="bg-gradient-to-r from-pink-500 to-rose-400 h-full rounded-full transition-all duration-100"
-            style={{ width: `${bloomProgress}%` }}
-          />
         </div>
-        <p className="text-xs text-rose-300/80 mt-2 font-light italic">
-          {bloomProgress < 100 ? "Bó hoa tươi thắm đang nở dần..." : "Hoa đã nở rộ thắm tươi ✨"}
-        </p>
+
+        {/* Progress bar and hint text */}
+        <div className="flex flex-col items-center gap-2 mt-4">
+          <p className="text-xs font-semibold text-rose-200/90 tracking-wide">
+            {isCompleted
+              ? "Hoa đã nở rộ thắm tươi ✨"
+              : holdProgress > 0
+              ? "Đang thắp sáng & làm hoa nở..."
+              : "Nhấn & Giữ để đóa hoa nở rộ ✨"}
+          </p>
+          <div className="w-48 h-2 bg-slate-800/80 border border-slate-700/60 rounded-full overflow-hidden p-0.5">
+            <div
+              className="bg-gradient-to-r from-pink-500 to-rose-400 h-full rounded-full transition-all duration-75"
+              style={{ width: `${holdProgress * 100}%` }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="pb-4 w-full max-w-xs">
-        <button
-          onClick={onComplete}
-          className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-rose-200 bg-white/10 hover:bg-white/15 border border-white/20 transition-all active:scale-95 cursor-pointer"
-        >
-          Mở thiệp mừng ngay →
-        </button>
+      <div className="pb-4 w-full max-w-xs z-10 shrink-0">
+        <p className="text-[11px] text-rose-300/70 italic">
+          Lớp 12¹ • Tri Ân Cô Giáo
+        </p>
       </div>
     </motion.div>
   );
 }
 
+// Stage 2: Dynamic Greeting Letter Stage with Wax Seal & Typewriter Text
 function TeacherStage2GreetingCard({ teacherData, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const rawName = teacherData?.name || "Giáo Chủ Nhiệm";
+  const cleanName = rawName.replace(/^Cô\s+/i, "");
+  const greetingHeader = `Kính gửi Cô ${cleanName}`.normalize("NFC");
+
+  const wish = (teacherData?.wish || DEFAULT_TEACHER.wish).normalize("NFC");
+  const fullText = `${greetingHeader},\n\n${wish}\n\n— Tập thể học sinh lớp 12¹ —`;
+
+  const [typedCount, setTypedCount] = useState(0);
+  const [typingComplete, setTypingComplete] = useState(false);
+
   const handleOpenLetter = () => {
+    if (isOpen) return;
     playPaperSound();
+    setTypedCount(0);
+    setTypingComplete(false);
     setIsOpen(true);
     confetti({
-      particleCount: 50,
-      spread: 60,
+      particleCount: 60,
+      spread: 70,
       origin: { y: 0.6 },
       colors: ['#f43f5e', '#ec4899', '#f472b6', '#fbbf24']
     });
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    let current = 0;
+
+    const interval = setInterval(() => {
+      current++;
+      setTypedCount(current);
+      if (current >= fullText.length) {
+        setTypingComplete(true);
+        clearInterval(interval);
+      }
+    }, 35);
+
+    return () => clearInterval(interval);
+  }, [isOpen, fullText.length]);
+
   return (
     <motion.div
+      key="teacher-stage-2"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="flex flex-col items-center justify-between h-full py-6 px-4 text-center z-10 overflow-y-auto"
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="flex flex-col items-center justify-between h-full py-6 px-4 text-center z-10 overflow-hidden relative bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bgImage})` }}
     >
-      <div className="pt-2">
+      <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[2px] -z-10" />
+
+      <AmbientParticles />
+
+      <div className="pt-2 z-10 shrink-0">
         <span className="text-2xl">💌</span>
         <h2 className="text-xl font-bold text-rose-200 font-serif" style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}>
           Bức Thư Tri Ân
         </h2>
       </div>
 
-      {!isOpen ? (
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="my-auto w-full max-w-xs bg-slate-900/90 border border-rose-500/30 rounded-2xl p-6 shadow-2xl flex flex-col items-center gap-4 relative overflow-hidden backdrop-blur-md"
-        >
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
-
-          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 p-0.5 shadow-lg my-2 flex items-center justify-center">
-            <span className="text-3xl">✉️</span>
-          </div>
-
-          <h3 className="text-sm font-semibold text-rose-100">
-            Gửi: {teacherData?.name || "Cô Giáo Chủ Nhiệm"}
-          </h3>
-
-          <p className="text-xs text-slate-300 italic">
-            "Nhấn vào con dấu sáp bên dưới để mở thư gửi Cô..."
-          </p>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+      <div className="z-10 my-auto w-full max-w-xs flex flex-col items-center [perspective:1000px]">
+        {!isOpen ? (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, transition: { duration: 0.4 } }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             onClick={handleOpenLetter}
-            className="flex flex-col items-center gap-1.5 cursor-pointer group bg-transparent border-none p-0 outline-none"
+            className="w-full h-72 rounded-3xl bg-amber-50 text-slate-800 border-2 border-amber-200/80 p-6 shadow-2xl flex flex-col items-center justify-between relative cursor-pointer group overflow-hidden select-none"
           >
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-600 via-rose-700 to-red-800 border-2 border-amber-300/60 shadow-xl flex items-center justify-center relative">
-              <span className="text-2xl filter drop-shadow-md group-hover:rotate-12 transition-transform">🏵️</span>
-              <span className="absolute inset-0 rounded-full border border-amber-200/30 animate-ping opacity-25" />
+            <div
+              className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-rose-100/60 via-amber-100/40 to-transparent pointer-events-none border-b border-amber-200/50"
+              style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
+            />
+
+            <div className="absolute top-3 left-4 text-pink-500 text-sm">🌸</div>
+            <div className="absolute top-3 right-4 text-amber-500 text-sm">✨</div>
+            <div className="absolute bottom-3 left-4 text-amber-500 text-sm">✨</div>
+            <div className="absolute bottom-3 right-4 text-pink-500 text-sm">💖</div>
+
+            <div className="text-center pt-3 z-10">
+              <p className="text-xs font-bold text-rose-600 uppercase tracking-widest font-serif">
+                THƯ CHÚC MỪNG 20/10
+              </p>
+              <h3 className="text-lg font-black text-slate-900 mt-1 font-serif" style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}>
+                {greetingHeader}
+              </h3>
             </div>
-            <span className="text-[10px] font-bold tracking-wider text-amber-300 uppercase">
-              Mở Thư
-            </span>
-          </motion.button>
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="my-auto w-full max-w-xs bg-amber-50/95 text-slate-800 border-2 border-amber-200 rounded-2xl p-5 shadow-2xl text-left relative overflow-hidden backdrop-blur-md my-2"
-        >
-          <div className="flex items-center justify-between border-b border-amber-200 pb-2 mb-3">
-            <span className="text-xs font-bold text-rose-800 tracking-wider uppercase font-serif">
-              THƯ CHÚC MỪNG 20/10
-            </span>
-            <span className="text-base">🌸</span>
-          </div>
 
-          <div className="text-xs leading-relaxed font-serif text-slate-800 space-y-2" style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}>
-            <p className="font-bold text-rose-900 text-sm">
-              Kính gửi {teacherData?.name?.startsWith("Cô") ? teacherData.name : `Cô ${teacherData?.name || "Chủ Nhiệm"}`},
-            </p>
-            <p className="whitespace-pre-line text-slate-800">
-              {teacherData?.wish || DEFAULT_TEACHER.wish}
-            </p>
-            <p className="text-right font-bold italic text-rose-900 pt-2">
-              — Tập thể học sinh lớp 12¹ —
-            </p>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-amber-200/80 flex justify-end">
-            <button
-              onClick={onNextStage}
-              className="py-2 px-4 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 shadow-md active:scale-95 cursor-pointer transition-all"
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative my-auto cursor-pointer z-10"
             >
-              Xem Album Kỷ Niệm →
-            </button>
-          </div>
-        </motion.div>
-      )}
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose-600 via-red-700 to-rose-900 border-4 border-amber-300/80 shadow-2xl flex items-center justify-center wax-seal-glow">
+                <span className="text-amber-100 font-black text-base tracking-wider drop-shadow-md">
+                  Mở Thư
+                </span>
+              </div>
+            </motion.div>
 
-      <div className="pb-2 text-[10px] text-slate-400">
-        Lớp 12¹ • Tri Ân Cô Giáo
+            <p className="text-[11px] text-slate-500 font-medium tracking-wide pb-1 z-10">
+              Chạm vào dấu sáp để mở thư ✨
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ y: -30, opacity: 0, scale: 0.95 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full min-h-[320px] max-h-[420px] overflow-y-auto rounded-3xl bg-amber-50 text-slate-800 border-4 border-rose-300/80 p-5 sm:p-6 shadow-2xl flex flex-col justify-between relative select-none text-left"
+            style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
+          >
+            <div className="flex items-center justify-between border-b border-amber-200/80 pb-2 mb-3 shrink-0">
+              <span className="text-xs font-bold text-rose-800 tracking-wider uppercase font-serif">
+                THƯ CHÚC MỪNG 20/10
+              </span>
+              <span className="text-base">🌸</span>
+            </div>
+
+            <div className="my-auto py-1 flex flex-col justify-between">
+              <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-800 whitespace-pre-line">
+                {fullText.slice(0, typedCount)}
+                {!typingComplete && (
+                  <span className="typing-cursor ml-0.5 font-sans not-italic">|</span>
+                )}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      <div className="z-10 pb-4 h-16 flex items-end w-full max-w-xs shrink-0">
+        <AnimatePresence>
+          {isOpen && typingComplete && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onNextStage}
+              className="w-full py-3.5 px-5 rounded-2xl font-bold text-xs sm:text-sm text-white flex items-center justify-center gap-2 cursor-pointer shadow-2xl bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 border border-pink-300/40"
+            >
+              <span>Xem Album Kỷ Niệm 📸</span>
+              <motion.span
+                animate={{ x: [0, 5, 0] }}
+                transition={{ repeat: Infinity, duration: 1.2 }}
+              >
+                →
+              </motion.span>
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
 }
 
+// Stage 3: Dynamic Memories Photo Album Stage (Responsive Masonry, Natural Aspect Ratios)
 function TeacherStage3PhotoAlbum({ teacherData, onRestart }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const memories = teacherData?.memories || DEFAULT_TEACHER.memories;
@@ -1134,39 +1243,49 @@ function TeacherStage3PhotoAlbum({ teacherData, onRestart }) {
 
   return (
     <motion.div
+      key="teacher-stage-3"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-between h-full py-6 px-4 text-center z-10 overflow-y-auto"
+      transition={{ duration: 0.6 }}
+      className="flex flex-col items-center justify-between h-full py-6 px-4 text-center z-10 overflow-hidden relative bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bgImage})` }}
     >
-      <div className="pt-2">
+      <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[2px] -z-10" />
+
+      <AmbientParticles />
+
+      <div className="pt-2 shrink-0 z-10">
         <span className="text-xs uppercase tracking-widest text-pink-300 font-semibold block mb-1">
           📸 KỶ NIỆM ĐÁNG NHỚ
         </span>
-        <h2 className="text-xl font-bold bg-gradient-to-r from-pink-200 via-rose-300 to-amber-200 bg-clip-text text-transparent font-serif" style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}>
+        <h2
+          className="text-xl font-bold bg-gradient-to-r from-pink-200 via-rose-300 to-amber-200 bg-clip-text text-transparent font-serif"
+          style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
+        >
           Album Ảnh Lớp 12¹ & Cô
         </h2>
       </div>
 
-      <div className="my-auto w-full max-w-xs py-3">
-        <div className="grid grid-cols-2 gap-2.5 max-h-[420px] overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-rose-500">
+      <div className="my-auto w-full max-w-xs py-3 z-10 max-h-[60vh] overflow-y-auto no-scrollbar pr-1">
+        <div className="columns-2 gap-3 space-y-3 text-left">
           {memories.map((imgUrl, idx) => (
             <motion.div
               key={idx}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedImage(imgUrl)}
-              className="relative aspect-square rounded-xl overflow-hidden border-2 border-rose-400/30 bg-slate-900/80 shadow-md cursor-pointer group"
+              className="break-inside-avoid rounded-2xl overflow-hidden border-2 border-rose-400/30 bg-slate-900/80 shadow-lg cursor-pointer group relative"
             >
               <img
                 src={imgUrl}
                 alt={`Kỷ niệm ${idx + 1}`}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-auto block rounded-xl group-hover:opacity-95 transition-all duration-300"
                 onError={(e) => {
                   e.currentTarget.src = "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop";
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2 pointer-events-none">
                 <span className="text-[10px] text-white font-medium">Kỷ niệm #{idx + 1}</span>
               </div>
             </motion.div>
@@ -1174,6 +1293,7 @@ function TeacherStage3PhotoAlbum({ teacherData, onRestart }) {
         </div>
       </div>
 
+      {/* Lightbox image preview modal */}
       <AnimatePresence>
         {selectedImage && (
           <motion.div
@@ -1187,12 +1307,12 @@ function TeacherStage3PhotoAlbum({ teacherData, onRestart }) {
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.8 }}
-              className="relative max-w-sm max-h-[80vh] rounded-2xl overflow-hidden border-2 border-rose-400 shadow-2xl"
+              className="relative max-w-sm max-h-[80vh] rounded-2xl overflow-hidden border-2 border-rose-400 shadow-2xl bg-slate-900"
             >
               <img
                 src={selectedImage}
                 alt="Enlarged memory"
-                className="w-full h-full object-contain max-h-[75vh]"
+                className="w-full h-auto max-h-[75vh] object-contain"
               />
               <div className="absolute bottom-2 right-2 bg-slate-900/80 text-white text-[10px] px-2 py-1 rounded-full border border-white/20">
                 Nhấn để đóng
@@ -1202,13 +1322,14 @@ function TeacherStage3PhotoAlbum({ teacherData, onRestart }) {
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-xs pb-2 pt-2">
-        <button
+      <div className="w-full max-w-xs z-10 shrink-0 pb-2">
+        <motion.button
           onClick={onRestart}
-          className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-rose-200 bg-white/10 hover:bg-white/15 border border-white/20 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1"
+          whileTap={{ scale: 0.95 }}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-xs text-pink-200 bg-white/10 hover:bg-white/15 border border-white/15 cursor-pointer transition-all shadow-md"
         >
           ← Xem lại từ đầu
-        </button>
+        </motion.button>
       </div>
     </motion.div>
   );
@@ -1399,7 +1520,7 @@ export default function App() {
   }, []);
 
   const handleNextStage = () => {
-    setCurrentStage(prev => Math.min(4, prev + 1));
+    setCurrentStage(prev => Math.min(isTeacherRoute ? 3 : 4, prev + 1));
   };
 
   const handleRestart = () => {
