@@ -575,6 +575,7 @@ function Stage2SequentialMessagesAndBouquet({ onNextStage }) {
 // ─────────────────────────────────────────────
 function Stage3GreetingCard({ student, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
+  const letterContainerRef = useRef(null);
   const name = student?.name || DEFAULT_NAME;
   const wish = (student?.wish || DEFAULT_WISH).normalize("NFC");
   const fullText = `Thân gửi ${name}\n\n${wish}`;
@@ -604,6 +605,15 @@ function Stage3GreetingCard({ student, onNextStage }) {
 
     return () => clearInterval(interval);
   }, [isOpen, fullText.length]);
+
+  useEffect(() => {
+    if (isOpen && letterContainerRef.current) {
+      letterContainerRef.current.scrollTo({
+        top: letterContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [typedCount, isOpen]);
 
   return (
     <motion.div
@@ -668,13 +678,14 @@ function Stage3GreetingCard({ student, onNextStage }) {
           </motion.div>
         ) : (
           <motion.div
+            ref={letterContainerRef}
             initial={{ y: -50, opacity: 0, scale: 0.9 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full min-h-[310px] rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 sm:p-7 shadow-2xl flex flex-col justify-between relative select-none"
+            className="w-full min-h-[310px] max-h-[380px] overflow-y-auto rounded-3xl bg-amber-50 text-slate-800 border-4 border-pink-300/80 p-6 sm:p-7 shadow-2xl flex flex-col justify-between relative select-none"
             style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
           >
-            <div className="my-auto py-2 flex flex-col justify-between h-full">
+            <div className="my-auto py-2 flex flex-col justify-between min-h-full">
               <p className="text-sm sm:text-base font-medium leading-relaxed text-slate-800 whitespace-pre-line">
                 {fullText.slice(0, typedCount)}
                 {!typingComplete && (
@@ -1064,6 +1075,7 @@ function TeacherStage1FlowerBloom({ onComplete }) {
 // Stage 2: Dynamic Greeting Letter Stage with Wax Seal & Typewriter Text
 function TeacherStage2GreetingCard({ teacherData, onNextStage }) {
   const [isOpen, setIsOpen] = useState(false);
+  const letterContainerRef = useRef(null);
 
   const rawName = teacherData?.name || "Giáo Chủ Nhiệm";
   const cleanName = rawName.replace(/^Cô\s+/i, "");
@@ -1104,6 +1116,15 @@ function TeacherStage2GreetingCard({ teacherData, onNextStage }) {
 
     return () => clearInterval(interval);
   }, [isOpen, fullText.length]);
+
+  useEffect(() => {
+    if (isOpen && letterContainerRef.current) {
+      letterContainerRef.current.scrollTo({
+        top: letterContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [typedCount, isOpen]);
 
   return (
     <motion.div
@@ -1173,6 +1194,7 @@ function TeacherStage2GreetingCard({ teacherData, onNextStage }) {
           </motion.div>
         ) : (
           <motion.div
+            ref={letterContainerRef}
             initial={{ y: -30, opacity: 0, scale: 0.95 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -1186,7 +1208,7 @@ function TeacherStage2GreetingCard({ teacherData, onNextStage }) {
               <span className="text-base">🌸</span>
             </div>
 
-            <div className="my-auto py-1 flex flex-col justify-between">
+            <div className="my-auto py-1 flex flex-col justify-between min-h-full">
               <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-800 whitespace-pre-line">
                 {fullText.slice(0, typedCount)}
                 {!typingComplete && (
