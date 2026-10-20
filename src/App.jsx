@@ -21,6 +21,20 @@ const DEFAULT_STUDENT = {
   title: "NĂNG ĐỘNG & TỎA SÁNG"
 };
 
+const DEFAULT_TEACHER = {
+  id: "teacher",
+  name: "Cô Giáo Chủ Nhiệm".normalize("NFC"),
+  wish: "Kính chúc Cô luôn giữ vững nhiệt huyết, ngọn lửa đam mê với nghề giáo, luôn chan chứa tình yêu thương dành cho thế hệ học trò và gặt hái thật nhiều thành công, hạnh phúc trong cuộc sống!".normalize("NFC"),
+  avatar_url: "",
+  title: "NGƯỜI LÁI ĐÒ TẬN TỤY".normalize("NFC"),
+  memories: [
+    "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop"
+  ]
+};
+
 // ─────────────────────────────────────────────
 // Constants & Sequential Messages
 // ─────────────────────────────────────────────
@@ -858,10 +872,355 @@ function Stage4HonorVisaCard({ student, onRestart }) {
 }
 
 // ─────────────────────────────────────────────
+// Sound Effect Helper
+// ─────────────────────────────────────────────
+function playPaperSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = ctx.sampleRate * 0.15;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200;
+    filter.Q.value = 1.5;
+    noise.connect(filter);
+    filter.connect(ctx.destination);
+    noise.start();
+  } catch (e) {
+    console.log("AudioContext SFX error:", e);
+  }
+}
+
+// ─────────────────────────────────────────────
+// TEACHER FLOW COMPONENTS
+// ─────────────────────────────────────────────
+function TeacherStage1FlowerBloom({ onComplete }) {
+  const [bloomProgress, setBloomProgress] = useState(0);
+  const isCompleteRef = useRef(false);
+
+  useEffect(() => {
+    const duration = 5000;
+    const intervalTime = 50;
+    const increment = 100 / (duration / intervalTime);
+
+    const timer = setInterval(() => {
+      setBloomProgress(prev => {
+        const next = prev + increment;
+        if (next >= 100) {
+          clearInterval(timer);
+          if (!isCompleteRef.current) {
+            isCompleteRef.current = true;
+            setTimeout(() => {
+              onComplete();
+            }, 600);
+          }
+          return 100;
+        }
+        return next;
+      });
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [onComplete]);
+
+  const roseScale = 0.5 + (bloomProgress / 100) * 0.6;
+  const petalOpacity = bloomProgress / 100;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col items-center justify-between h-full py-8 px-4 text-center z-10"
+    >
+      <div className="pt-4">
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="inline-block bg-rose-500/20 border border-rose-400/30 backdrop-blur-md text-rose-200 text-xs px-3 py-1 rounded-full font-medium mb-2"
+        >
+          ✨ Ngày Phụ Nữ Việt Nam 20/10 ✨
+        </motion.div>
+        <motion.h1
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-2xl font-bold bg-gradient-to-r from-pink-200 via-rose-300 to-amber-200 bg-clip-text text-transparent drop-shadow-md font-serif"
+          style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}
+        >
+          Gửi tới Cô Giáo Chủ Nhiệm
+        </motion.h1>
+      </div>
+
+      <div className="relative flex flex-col items-center justify-center my-auto">
+        <motion.div
+          className="relative w-56 h-56 flex items-center justify-center cursor-pointer"
+          onClick={() => {
+            if (!isCompleteRef.current) {
+              setBloomProgress(100);
+            }
+          }}
+        >
+          <div
+            className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500/20 to-rose-500/30 blur-xl transition-all duration-500"
+            style={{ transform: `scale(${roseScale + 0.2})` }}
+          />
+
+          <motion.div
+            style={{ scale: roseScale }}
+            className="text-8xl filter drop-shadow-[0_0_20px_rgba(244,63,94,0.6)] select-none transition-transform duration-300"
+          >
+            💐
+          </motion.div>
+
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-700"
+            style={{ opacity: petalOpacity }}
+          >
+            <span className="absolute -top-2 text-3xl animate-bounce">🌸</span>
+            <span className="absolute -bottom-2 text-3xl animate-bounce delay-100">🌹</span>
+            <span className="absolute -left-2 text-3xl animate-bounce delay-200">🌺</span>
+            <span className="absolute -right-2 text-3xl animate-bounce delay-300">🌷</span>
+          </div>
+        </motion.div>
+
+        <div className="w-48 bg-slate-800/80 border border-slate-700/60 rounded-full h-2 mt-6 overflow-hidden p-0.5">
+          <div
+            className="bg-gradient-to-r from-pink-500 to-rose-400 h-full rounded-full transition-all duration-100"
+            style={{ width: `${bloomProgress}%` }}
+          />
+        </div>
+        <p className="text-xs text-rose-300/80 mt-2 font-light italic">
+          {bloomProgress < 100 ? "Bó hoa tươi thắm đang nở dần..." : "Hoa đã nở rộ thắm tươi ✨"}
+        </p>
+      </div>
+
+      <div className="pb-4 w-full max-w-xs">
+        <button
+          onClick={onComplete}
+          className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-rose-200 bg-white/10 hover:bg-white/15 border border-white/20 transition-all active:scale-95 cursor-pointer"
+        >
+          Mở thiệp mừng ngay →
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+function TeacherStage2GreetingCard({ teacherData, onNextStage }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenLetter = () => {
+    playPaperSound();
+    setIsOpen(true);
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.6 },
+      colors: ['#f43f5e', '#ec4899', '#f472b6', '#fbbf24']
+    });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="flex flex-col items-center justify-between h-full py-6 px-4 text-center z-10 overflow-y-auto"
+    >
+      <div className="pt-2">
+        <span className="text-2xl">💌</span>
+        <h2 className="text-xl font-bold text-rose-200 font-serif" style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}>
+          Bức Thư Tri Ân
+        </h2>
+      </div>
+
+      {!isOpen ? (
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="my-auto w-full max-w-xs bg-slate-900/90 border border-rose-500/30 rounded-2xl p-6 shadow-2xl flex flex-col items-center gap-4 relative overflow-hidden backdrop-blur-md"
+        >
+          <div className="absolute -top-10 -right-10 w-28 h-28 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 p-0.5 shadow-lg my-2 flex items-center justify-center">
+            <span className="text-3xl">✉️</span>
+          </div>
+
+          <h3 className="text-sm font-semibold text-rose-100">
+            Gửi: {teacherData?.name || "Cô Giáo Chủ Nhiệm"}
+          </h3>
+
+          <p className="text-xs text-slate-300 italic">
+            "Nhấn vào con dấu sáp bên dưới để mở thư gửi Cô..."
+          </p>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleOpenLetter}
+            className="flex flex-col items-center gap-1.5 cursor-pointer group bg-transparent border-none p-0 outline-none"
+          >
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-600 via-rose-700 to-red-800 border-2 border-amber-300/60 shadow-xl flex items-center justify-center relative">
+              <span className="text-2xl filter drop-shadow-md group-hover:rotate-12 transition-transform">🏵️</span>
+              <span className="absolute inset-0 rounded-full border border-amber-200/30 animate-ping opacity-25" />
+            </div>
+            <span className="text-[10px] font-bold tracking-wider text-amber-300 uppercase">
+              Mở Thư
+            </span>
+          </motion.button>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="my-auto w-full max-w-xs bg-amber-50/95 text-slate-800 border-2 border-amber-200 rounded-2xl p-5 shadow-2xl text-left relative overflow-hidden backdrop-blur-md my-2"
+        >
+          <div className="flex items-center justify-between border-b border-amber-200 pb-2 mb-3">
+            <span className="text-xs font-bold text-rose-800 tracking-wider uppercase font-serif">
+              THƯ CHÚC MỪNG 20/10
+            </span>
+            <span className="text-base">🌸</span>
+          </div>
+
+          <div className="text-xs leading-relaxed font-serif text-slate-800 space-y-2" style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}>
+            <p className="font-bold text-rose-900 text-sm">
+              Kính gửi {teacherData?.name?.startsWith("Cô") ? teacherData.name : `Cô ${teacherData?.name || "Chủ Nhiệm"}`},
+            </p>
+            <p className="whitespace-pre-line text-slate-800">
+              {teacherData?.wish || DEFAULT_TEACHER.wish}
+            </p>
+            <p className="text-right font-bold italic text-rose-900 pt-2">
+              — Tập thể học sinh lớp 12¹ —
+            </p>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-amber-200/80 flex justify-end">
+            <button
+              onClick={onNextStage}
+              className="py-2 px-4 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 shadow-md active:scale-95 cursor-pointer transition-all"
+            >
+              Xem Album Kỷ Niệm →
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      <div className="pb-2 text-[10px] text-slate-400">
+        Lớp 12¹ • Tri Ân Cô Giáo
+      </div>
+    </motion.div>
+  );
+}
+
+function TeacherStage3PhotoAlbum({ teacherData, onRestart }) {
+  const [selectedImage, setSelectedImage] = useState(null);
+  const memories = teacherData?.memories || DEFAULT_TEACHER.memories;
+
+  useEffect(() => {
+    confetti({
+      particleCount: 70,
+      spread: 70,
+      origin: { y: 0.5 },
+      colors: ['#f43f5e', '#ec4899', '#f472b6', '#fbbf24', '#a855f7']
+    });
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col items-center justify-between h-full py-6 px-4 text-center z-10 overflow-y-auto"
+    >
+      <div className="pt-2">
+        <span className="text-xs uppercase tracking-widest text-pink-300 font-semibold block mb-1">
+          📸 KỶ NIỆM ĐÁNG NHỚ
+        </span>
+        <h2 className="text-xl font-bold bg-gradient-to-r from-pink-200 via-rose-300 to-amber-200 bg-clip-text text-transparent font-serif" style={{ fontFamily: "Georgia, Cambria, 'Times New Roman', Times, serif" }}>
+          Album Ảnh Lớp 12¹ & Cô
+        </h2>
+      </div>
+
+      <div className="my-auto w-full max-w-xs py-3">
+        <div className="grid grid-cols-2 gap-2.5 max-h-[420px] overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-rose-500">
+          {memories.map((imgUrl, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setSelectedImage(imgUrl)}
+              className="relative aspect-square rounded-xl overflow-hidden border-2 border-rose-400/30 bg-slate-900/80 shadow-md cursor-pointer group"
+            >
+              <img
+                src={imgUrl}
+                alt={`Kỷ niệm ${idx + 1}`}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+                <span className="text-[10px] text-white font-medium">Kỷ niệm #{idx + 1}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              className="relative max-w-sm max-h-[80vh] rounded-2xl overflow-hidden border-2 border-rose-400 shadow-2xl"
+            >
+              <img
+                src={selectedImage}
+                alt="Enlarged memory"
+                className="w-full h-full object-contain max-h-[75vh]"
+              />
+              <div className="absolute bottom-2 right-2 bg-slate-900/80 text-white text-[10px] px-2 py-1 rounded-full border border-white/20">
+                Nhấn để đóng
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="w-full max-w-xs pb-2 pt-2">
+        <button
+          onClick={onRestart}
+          className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-rose-200 bg-white/10 hover:bg-white/15 border border-white/20 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1"
+        >
+          ← Xem lại từ đầu
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN APP COMPONENT
 // ─────────────────────────────────────────────
 export default function App() {
   const [student, setStudent] = useState(DEFAULT_STUDENT);
+  const [isTeacherRoute, setIsTeacherRoute] = useState(false);
+  const [teacherData, setTeacherData] = useState(DEFAULT_TEACHER);
   const [isLoading, setIsLoading] = useState(true);
   const [currentStage, setCurrentStage] = useState(1);
   const audioRef = useRef(null);
@@ -955,12 +1314,17 @@ export default function App() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadStudentData() {
+    async function loadData() {
       try {
+        const pathname = window.location.pathname;
         const params = new URLSearchParams(window.location.search);
-        const urlId = params.get('id') || '1';
+        const roleParam = params.get('role');
+        const idParam = params.get('id');
 
-        console.log("[DEBUG] Extracted URL id:", urlId);
+        const isTeacher = pathname.startsWith('/teacher') || roleParam === 'teacher' || idParam === 'teacher';
+        if (isMounted) {
+          setIsTeacherRoute(isTeacher);
+        }
 
         if (!supabase) {
           console.warn("[DEBUG] Supabase client missing env vars, using fallback.");
@@ -968,27 +1332,58 @@ export default function App() {
           return;
         }
 
-        const { data, error } = await supabase
-          .from('students')
-          .select('id, name, wish, avatar_url, title')
-          .eq('id', String(urlId))
-          .maybeSingle();
+        if (isTeacher) {
+          // Query students table where id = 'teacher' as a string
+          const { data, error } = await supabase
+            .from('students')
+            .select('id, name, wish, avatar_url, title, memories')
+            .eq('id', 'teacher')
+            .maybeSingle();
 
-        if (error) {
-          console.error("[DEBUG] Supabase query error:", error.message);
-        }
+          if (error) {
+            console.error("[DEBUG] Supabase teacher query error:", error.message);
+          }
 
-        if (isMounted) {
-          if (data) {
-            console.log("[DEBUG] Successfully fetched student:", data);
-            setStudent({
-              ...DEFAULT_STUDENT,
-              ...data,
-              name: data.name || DEFAULT_STUDENT.name,
-              wish: data.wish || DEFAULT_STUDENT.wish
-            });
-          } else {
-            console.warn("[DEBUG] No student found for ID:", urlId);
+          if (isMounted) {
+            if (data) {
+              console.log("[DEBUG] Successfully fetched teacher data:", data);
+              setTeacherData({
+                ...DEFAULT_TEACHER,
+                ...data,
+                name: data.name || DEFAULT_TEACHER.name,
+                wish: data.wish || DEFAULT_TEACHER.wish,
+                memories: (data.memories && data.memories.length > 0) ? data.memories : DEFAULT_TEACHER.memories
+              });
+            } else {
+              console.warn("[DEBUG] No teacher record found in Supabase (id='teacher'), using default.");
+            }
+          }
+        } else {
+          const urlId = idParam || '1';
+          console.log("[DEBUG] Extracted URL id:", urlId);
+
+          const { data, error } = await supabase
+            .from('students')
+            .select('id, name, wish, avatar_url, title')
+            .eq('id', String(urlId))
+            .maybeSingle();
+
+          if (error) {
+            console.error("[DEBUG] Supabase student query error:", error.message);
+          }
+
+          if (isMounted) {
+            if (data) {
+              console.log("[DEBUG] Successfully fetched student:", data);
+              setStudent({
+                ...DEFAULT_STUDENT,
+                ...data,
+                name: data.name || DEFAULT_STUDENT.name,
+                wish: data.wish || DEFAULT_STUDENT.wish
+              });
+            } else {
+              console.warn("[DEBUG] No student found for ID:", urlId);
+            }
           }
         }
       } catch (err) {
@@ -998,7 +1393,7 @@ export default function App() {
       }
     }
 
-    loadStudentData();
+    loadData();
 
     return () => { isMounted = false; };
   }, []);
@@ -1084,6 +1479,18 @@ export default function App() {
             <p className="text-sm font-medium">Đang tải thiệp chúc mừng...</p>
           </div>
         </div>
+      ) : isTeacherRoute ? (
+        <AnimatePresence mode="wait">
+          {currentStage === 1 && (
+            <TeacherStage1FlowerBloom key="t1" onComplete={handleNextStage} />
+          )}
+          {currentStage === 2 && (
+            <TeacherStage2GreetingCard key="t2" teacherData={teacherData} onNextStage={handleNextStage} />
+          )}
+          {currentStage === 3 && (
+            <TeacherStage3PhotoAlbum key="t3" teacherData={teacherData} onRestart={handleRestart} />
+          )}
+        </AnimatePresence>
       ) : (
         <AnimatePresence mode="wait">
           {currentStage === 1 && (
